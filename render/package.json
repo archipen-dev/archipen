@@ -1,6 +1,6 @@
 {
   "name": "@archipen/render",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Render Archipen diagrams to SVG, PNG and PDF without a browser: command line, Node API and HTTP server.",
   "type": "module",
   "bin": {

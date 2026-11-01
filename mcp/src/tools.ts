@@ -42,7 +42,7 @@ const expectRevision = z
   .describe('The revision from get_diagram. The change is refused if the diagram changed since (for example, the user edited it).')
 
 export function createServer(bridge: Bridge, opts: ServerOptions) {
-  const server = new McpServer({ name: 'archipen', version: opts.version ?? '0.1.0' }, { instructions: INSTRUCTIONS })
+  const server = new McpServer({ name: 'archipen', version: opts.version ?? '0.1.1' }, { instructions: INSTRUCTIONS })
 
   const link = () => pairingLink(opts.appUrl, bridge.pairing)
   const notConnected = () =>
