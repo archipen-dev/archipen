@@ -3,6 +3,7 @@ import { afterAll, beforeAll, describe, expect, test } from 'vitest'
 import { normalizeBasePath, startServer } from '../src/server'
 
 const body = readFileSync(new URL('../../examples/minimal.archipen.json', import.meta.url))
+const minimal = JSON.parse(body.toString())
 
 describe.each(['', '/tools/api'])('base path "%s"', (base) => {
   let origin = ''
@@ -57,7 +58,6 @@ describe.each(['', '/tools/api'])('base path "%s"', (base) => {
 })
 
 describe('limits', () => {
-  const minimal = JSON.parse(body.toString())
   const gridPage = (n: number, p = '') => ({
     id: `p${p}`,
     nodes: Array.from({ length: n }, (_, i) => ({ id: `${p}n${i}`, x: (i % 50) * 4, y: Math.floor(i / 50) * 4 })),
@@ -91,20 +91,35 @@ describe('limits', () => {
     expect(res.status).toBe(422)
     expect((await res.json()).error).toMatch(/1200 items/)
   })
+})
+
+describe('render timeout', () => {
+  // A stub worker that never finishes a `slow` diagram: a real slow render depends on how fast the machine is.
+  let url = ''
+  let close: () => Promise<void>
+  beforeAll(async () => {
+    const workerUrl = new URL('./fixtures/slow-worker.mjs', import.meta.url)
+    const s = await startServer({ port: 0, host: '127.0.0.1', workers: 1, maxQueue: 1, renderTimeoutMs: 1000, workerUrl })
+    url = s.url
+    close = s.close
+  })
+  afterAll(() => close())
+  const post = (d: unknown, format = 'png') => fetch(`${url}export?format=${format}`, { method: 'POST', body: JSON.stringify(d) })
 
   test('a slow render is stopped; the server keeps answering meanwhile and afterwards', async () => {
-    const slow = post(grid(400), 'svg')
+    const slow = post({ ...minimal, slow: true }, 'svg')
     await new Promise((r) => setTimeout(r, 200))
     const started = Date.now()
     expect((await fetch(`${url}healthz`)).status).toBe(200)
     expect(Date.now() - started).toBeLessThan(500)
-    // One worker busy and one render queued: the next one is refused.
-    const queued = post(minimal)
-    expect((await post(minimal)).status).toBe(503)
+    // One worker busy and room for one render in the queue: of two more, one waits and one is refused.
+    // Both are in flight at once, so either may reach the server first.
+    const queued = [post(minimal), post(minimal)]
     const res = await slow
     expect(res.status).toBe(422)
     expect((await res.json()).error).toMatch(/longer than 1 s/)
-    expect((await queued).status).toBe(200)
+    const statuses = (await Promise.all(queued)).map((r) => r.status)
+    expect(statuses.sort()).toEqual([200, 503])
   })
 })
 
