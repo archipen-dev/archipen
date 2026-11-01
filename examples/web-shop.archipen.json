@@ -1,0 +1,36 @@
+{
+  "$schema": "../schema/archipen.schema.json",
+  "format": "archipen",
+  "name": "Web shop",
+  "settings": { "crossing": "gap" },
+  "pages": [
+    {
+      "id": "main",
+      "name": "Main",
+      "zones": [
+        { "id": "aws", "name": "AWS", "x": 4, "y": -2, "w": 19, "d": 14 },
+        { "id": "private", "name": "Private subnet", "x": 11, "y": -1, "w": 11, "d": 11, "color": "#2fb5a0", "dashed": true }
+      ],
+      "nodes": [
+        { "id": "users", "name": "Customers", "x": -2, "y": 3, "shape": "icon", "iconPlacement": "billboard", "icon": "lucide:users", "color": "#8a94a6" },
+        { "id": "lb", "name": "Load balancer", "x": 6, "y": 3, "h": 0.6, "icon": "lucide:split", "color": "#4aa3df" },
+        { "id": "api", "name": "API", "description": "REST + websockets", "x": 12, "y": 0, "icon": "lucide:server" },
+        { "id": "worker", "name": "Worker", "x": 18, "y": 6, "icon": "lucide:cpu", "color": "#9b6cf0" },
+        { "id": "db", "name": "Postgres", "x": 18, "y": 0, "h": 1.4, "shape": "cylinder", "icon": "vendor:postgresql", "color": "#2fb5a0" },
+        { "id": "queue", "name": "Queue", "x": 12, "y": 6, "h": 0.6, "icon": "vendor:rabbitmq", "color": "#f2a93b" }
+      ],
+      "edges": [
+        { "id": "e-users-lb", "name": "HTTPS", "from": { "nodeId": "users" }, "to": { "nodeId": "lb" } },
+        { "id": "e-lb-api", "from": { "nodeId": "lb" }, "to": { "nodeId": "api" } },
+        { "id": "e-api-db", "name": "SQL", "from": { "nodeId": "api" }, "to": { "nodeId": "db" }, "arrows": "both", "flow": { "direction": "both", "speed": 1.4 } },
+        { "id": "e-api-queue", "name": "jobs", "from": { "nodeId": "api" }, "to": { "nodeId": "queue" }, "color": "#d98a1c" },
+        { "id": "e-queue-worker", "from": { "nodeId": "queue" }, "to": { "nodeId": "worker" }, "color": "#d98a1c" },
+        { "id": "e-worker-db", "from": { "nodeId": "worker" }, "to": { "nodeId": "db" }, "style": "dashed", "flow": { "enabled": false } }
+      ],
+      "texts": [
+        { "id": "title", "kind": "text", "name": "Web shop architecture", "x": 12, "y": -4, "label": { "fontSize": 22 } },
+        { "id": "deploys", "kind": "note", "name": "Deploys", "description": "Blue/green on every merge to main", "x": 7, "y": 13, "w": 4, "d": 2.5 }
+      ]
+    }
+  ]
+}

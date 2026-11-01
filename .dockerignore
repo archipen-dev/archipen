@@ -1,0 +1,12 @@
+**/node_modules
+**/dist
+**/test-results
+**/playwright-report
+.git
+.tanstack
+app/.tanstack
+docs/.vitepress/cache
+docs/.vitepress/dist
+*.log
+render/fonts
+render/vendor-icon-credits.txt

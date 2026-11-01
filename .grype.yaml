@@ -1,0 +1,17 @@
+# Temporary: the official caddy:2.11.7-alpine image ships a Caddy binary built with Go 1.26.8 and older modules.
+# Only a new upstream Caddy build fixes these. Delete this file once Dependabot bumps Caddy and the scan in
+# .github/workflows/docker.yml passes without it. Each rule is limited to the Caddy binary, so anything else still
+# fails the build.
+ignore:
+  - { vulnerability: GO-2026-6603, package: { location: /usr/bin/caddy } }
+  - { vulnerability: GO-2026-6604, package: { location: /usr/bin/caddy } }
+  - { vulnerability: GO-2026-6605, package: { location: /usr/bin/caddy } }
+  - { vulnerability: GO-2026-6607, package: { location: /usr/bin/caddy } }
+  - { vulnerability: GO-2026-6608, package: { location: /usr/bin/caddy } }
+  - { vulnerability: GO-2026-6609, package: { location: /usr/bin/caddy } }
+  - { vulnerability: GO-2026-6610, package: { location: /usr/bin/caddy } }
+  - { vulnerability: GO-2026-6611, package: { location: /usr/bin/caddy } }
+  - { vulnerability: GO-2026-6612, package: { location: /usr/bin/caddy } }
+  - { vulnerability: GO-2026-6613, package: { location: /usr/bin/caddy } }
+  - { vulnerability: GO-2026-6617, package: { location: /usr/bin/caddy } }
+  - { vulnerability: GHSA-mgcc-cww5-fp2q, package: { location: /usr/bin/caddy } }

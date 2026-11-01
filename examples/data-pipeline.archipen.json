@@ -1,0 +1,41 @@
+{
+  "$schema": "../schema/archipen.schema.json",
+  "format": "archipen",
+  "name": "Data pipeline",
+  "pages": [
+    {
+      "id": "main",
+      "name": "Main",
+      "zones": [
+        { "id": "sources", "name": "Sources", "x": -1, "y": -1, "w": 5, "d": 13, "color": "#8a94a6" },
+        { "id": "ingestion", "name": "Ingestion", "x": 7, "y": -1, "w": 5, "d": 13, "color": "#4aa3df", "dashed": true },
+        { "id": "platform", "name": "Analytics platform", "x": 15, "y": -3, "w": 13, "d": 14, "color": "#5b7cfa" }
+      ],
+      "nodes": [
+        { "id": "app-db", "name": "App database", "x": 0, "y": 0, "h": 1.4, "shape": "cylinder", "icon": "vendor:postgresql", "color": "#8a94a6" },
+        { "id": "stripe", "name": "Stripe", "x": 0, "y": 4, "h": 0.6, "icon": "vendor:stripe", "color": "#8a94a6" },
+        { "id": "events", "name": "App events", "x": 0, "y": 8, "h": 0.6, "icon": "lucide:activity", "color": "#8a94a6" },
+        { "id": "extract", "name": "Extract", "description": "Nightly batch loads", "x": 8, "y": 2, "icon": "lucide:download", "color": "#4aa3df" },
+        { "id": "stream", "name": "Stream", "x": 8, "y": 8, "h": 0.6, "icon": "vendor:apachekafka", "color": "#4aa3df" },
+        { "id": "lake", "name": "Data lake", "description": "Raw files, Parquet", "x": 16, "y": 4, "h": 1.2, "shape": "cylinder", "icon": "lucide:archive", "color": "#f2a93b" },
+        { "id": "airflow", "name": "Airflow", "x": 20, "y": -2, "h": 0.6, "icon": "lucide:workflow", "color": "#9b6cf0" },
+        { "id": "spark", "name": "Transform", "x": 20, "y": 4, "icon": "lucide:zap", "color": "#5b7cfa" },
+        { "id": "warehouse", "name": "Warehouse", "x": 24, "y": 4, "h": 1.4, "shape": "cylinder", "icon": "lucide:warehouse", "color": "#2fb5a0" },
+        { "id": "dashboards", "name": "Dashboards", "x": 30, "y": 1, "shape": "icon", "iconPlacement": "billboard", "icon": "lucide:layout-dashboard", "color": "#7dbb52" },
+        { "id": "ml", "name": "ML models", "x": 30, "y": 7, "h": 0.6, "icon": "lucide:brain", "color": "#e5604f" }
+      ],
+      "edges": [
+        { "id": "e-appdb-extract", "from": { "nodeId": "app-db" }, "to": { "nodeId": "extract" } },
+        { "id": "e-stripe-extract", "name": "API", "from": { "nodeId": "stripe" }, "to": { "nodeId": "extract" } },
+        { "id": "e-events-stream", "from": { "nodeId": "events" }, "to": { "nodeId": "stream" } },
+        { "id": "e-extract-lake", "from": { "nodeId": "extract" }, "to": { "nodeId": "lake" } },
+        { "id": "e-stream-lake", "from": { "nodeId": "stream" }, "to": { "nodeId": "lake" }, "style": "dashed" },
+        { "id": "e-airflow-spark", "name": "schedules", "from": { "nodeId": "airflow" }, "to": { "nodeId": "spark" }, "style": "dotted", "flow": { "enabled": false } },
+        { "id": "e-lake-spark", "from": { "nodeId": "lake" }, "to": { "nodeId": "spark" } },
+        { "id": "e-spark-warehouse", "from": { "nodeId": "spark" }, "to": { "nodeId": "warehouse" } },
+        { "id": "e-warehouse-dashboards", "name": "SQL", "from": { "nodeId": "warehouse" }, "to": { "nodeId": "dashboards" } },
+        { "id": "e-warehouse-ml", "from": { "nodeId": "warehouse" }, "to": { "nodeId": "ml" } }
+      ]
+    }
+  ]
+}

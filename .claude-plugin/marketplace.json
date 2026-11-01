@@ -1,0 +1,15 @@
+{
+  "name": "archipen",
+  "owner": { "name": "archipen-dev" },
+  "description": "The Archipen agent skill for isometric architecture diagrams.",
+  "plugins": [
+    {
+      "name": "archipen",
+      "source": "./",
+      "description": "Create Archipen isometric architecture diagrams: the file format rules, icon names, examples and a write, validate, render and fix loop.",
+      "homepage": "https://archipen.dev/file-format#use-with-ai-agents",
+      "license": "MIT",
+      "strict": false
+    }
+  ]
+}

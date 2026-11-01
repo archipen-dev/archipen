@@ -1,0 +1,197 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/instrument-sans';
+@import '@fontsource-variable/bricolage-grotesque';
+@import '@fontsource-variable/jetbrains-mono';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --paper: #f5f4f0;
+  --panel: rgb(255 255 255 / 0.9);
+  --panel-solid: #ffffff;
+  --line: #e4e1d8;
+  --line-strong: #d3cfc4;
+  --ink: #1c2130;
+  --ink-muted: #646a78; /* ≥ 4.5:1 on --chip and --paper (WCAG AA) */
+  --ink-faint: #9a9fab;
+  --chip: #f0eee8;
+  --chip-hover: #e8e5dc;
+  --accent: #f0532a;
+  --accent-soft: rgb(240 83 42 / 0.1);
+  --accent-ink: #ffffff;
+  --shadow: 0 1px 0 rgb(28 33 48 / 0.04), 0 8px 24px -8px rgb(28 33 48 / 0.16), 0 2px 6px -2px rgb(28 33 48 / 0.08);
+  color-scheme: light;
+}
+
+.dark {
+  --paper: #121419;
+  --panel: rgb(25 27 33 / 0.92);
+  --panel-solid: #1a1c22;
+  --line: #2a2d36;
+  --line-strong: #383c47;
+  --ink: #e8eaf0;
+  --ink-muted: #9298a7;
+  --ink-faint: #646a78;
+  --chip: #23262e;
+  --chip-hover: #2c3039;
+  --accent: #ff6a3d;
+  --accent-soft: rgb(255 106 61 / 0.14);
+  --accent-ink: #1a0d08;
+  --shadow: 0 1px 0 rgb(0 0 0 / 0.2), 0 12px 32px -8px rgb(0 0 0 / 0.6), 0 2px 6px -2px rgb(0 0 0 / 0.4);
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-panel: var(--panel);
+  --color-panel-solid: var(--panel-solid);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-faint: var(--ink-faint);
+  --color-chip: var(--chip);
+  --color-chip-hover: var(--chip-hover);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-ink: var(--accent-ink);
+  --font-sans: 'Instrument Sans Variable', 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Bricolage Grotesque Variable', 'Bricolage Grotesque', ui-sans-serif, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, monospace;
+  --shadow-float: var(--shadow);
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+kbd {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  line-height: 1;
+  padding: 3px 5px;
+  border-radius: 5px;
+  background: var(--chip);
+  border: 1px solid var(--line);
+  border-bottom-width: 2px;
+  color: var(--ink-muted);
+}
+
+.ap-float {
+  background: var(--panel);
+  backdrop-filter: blur(14px) saturate(1.4);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+}
+
+.ap-inline-edit {
+  font: 600 14px var(--font-sans);
+  text-align: center;
+  color: var(--ink);
+  background: var(--panel-solid);
+  border: 1.5px solid var(--accent);
+  border-radius: 8px;
+  padding: 6px 10px;
+  outline: none;
+  resize: none;
+  box-shadow: 0 0 0 4px var(--accent-soft), var(--shadow);
+}
+
+.ap-empty {
+  animation: ap-rise 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes ap-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+.ap-enter {
+  animation: ap-rise 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+/* range input */
+input[type='range'].ap-range {
+  appearance: none;
+  height: 18px;
+  background: transparent;
+}
+input[type='range'].ap-range::-webkit-slider-runnable-track {
+  height: 3px;
+  border-radius: 3px;
+  background: var(--line-strong);
+}
+input[type='range'].ap-range::-moz-range-track {
+  height: 3px;
+  border-radius: 3px;
+  background: var(--line-strong);
+}
+input[type='range'].ap-range::-webkit-slider-thumb {
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  margin-top: -5.5px;
+  border-radius: 50%;
+  background: var(--panel-solid);
+  border: 1.5px solid var(--accent);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.2);
+}
+input[type='range'].ap-range::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--panel-solid);
+  border: 1.5px solid var(--accent);
+}
+
+.ap-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+}
+
+::selection {
+  background: var(--accent-soft);
+}
+
+/* Tailwind v4 resets buttons to the default cursor; anything clickable gets a pointer. */
+@layer base {
+  button:not(:disabled),
+  [role='button']:not([aria-disabled='true']),
+  [role='menuitem']:not([data-disabled]),
+  [role='menuitemradio'],
+  [role='menuitemcheckbox'],
+  [role='option'],
+  [role='tab'],
+  [role='switch'],
+  [role='radio'],
+  a[href],
+  summary,
+  select,
+  input[type='checkbox'],
+  input[type='radio'],
+  input[type='color'],
+  input[type='file'],
+  input[type='range'],
+  label[for] {
+    cursor: pointer;
+  }
+  button:disabled,
+  [aria-disabled='true'] {
+    cursor: not-allowed;
+  }
+}

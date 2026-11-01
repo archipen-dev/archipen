@@ -1,0 +1,395 @@
+# The Archipen file format
+
+Archipen saves diagrams as JSON files named `*.archipen.json`. This page describes the format for people and for AI
+models that generate diagrams.
+
+- **JSON Schema:** [`schema/archipen.schema.json`](../schema/archipen.schema.json), published at
+  `https://archipen.dev/schema/archipen.schema.json`. It is generated from `app/src/model/schema.ts` and covers every
+  field, with descriptions and defaults. Add `"$schema": "https://archipen.dev/schema/archipen.schema.json"` to a
+  file to get validation and autocomplete in editors such as VS Code.
+- **Examples:** [`examples/minimal.archipen.json`](../examples/minimal.archipen.json), plus the starter templates
+  shown on the home page: [`web-shop`](../examples/web-shop.archipen.json),
+  [`kubernetes-cluster`](../examples/kubernetes-cluster.archipen.json),
+  [`event-driven`](../examples/event-driven.archipen.json), [`data-pipeline`](../examples/data-pipeline.archipen.json) and
+  [`ci-cd`](../examples/ci-cd.archipen.json). [`drill-down`](../examples/drill-down.archipen.json) shows several pages
+  with links between them.
+- **Validator:** `npm run validate -- my-diagram.archipen.json` lists every error and warning.
+
+## The smallest useful file
+
+```json
+{
+  "format": "archipen",
+  "name": "Minimal",
+  "pages": [
+    {
+      "id": "main",
+      "nodes": [
+        { "id": "app", "name": "App", "x": 0, "y": 0, "icon": "lucide:server" },
+        { "id": "db", "name": "Database", "x": 5, "y": 0, "shape": "cylinder", "icon": "lucide:database" }
+      ],
+      "edges": [{ "id": "app-db", "name": "SQL", "from": { "nodeId": "app" }, "to": { "nodeId": "db" } }]
+    }
+  ]
+}
+```
+
+Only `format` is required at the top level. Items live on pages: a diagram has one or more, and most have just one.
+Everything you leave out takes a default. Write only what differs from the defaults; files stay short, and items then
+follow the diagram-wide styles.
+
+## Rules at a glance
+
+1. `"format": "archipen"` is required.
+2. Items (nodes, zones, edges, texts) go inside `pages`, never at the top level. Every item needs an `id`, unique
+   across **all** items on all pages. Any string works; short readable ids like `"api"` or `"e-api-db"` are best.
+3. Positions and sizes are in **grid units**, not pixels. `x`/`y` is the **corner with the smallest x and y**, not the
+   centre.
+4. Colours are **6-digit hex** (`"#5b7cfa"`). Names like `"red"` and short forms like `"#fff"` are rejected.
+5. Icons are `"lucide:<name>"` with a name from the [built-in list](#built-in-icons), `"vendor:<name>"` with a name
+   from the [vendor list](#vendor-icons), or `"custom:<assetId>"`.
+6. Wires (`edges`) connect **nodes and zones on the same page**: each end has either a `nodeId` or a `zoneId`. They
+   can't attach to texts.
+7. Zones group whatever lies inside them. **Don't set `zoneId` or `parentZoneId`**: they are worked out from positions
+   when the file loads.
+8. Unknown fields are dropped when the file loads. The JSON Schema rejects them, so typos get caught.
+
+## Coordinates
+
+The ground is a grid. One unit is one grid cell (40 px at 100% zoom). The same file draws in two projections
+(`settings.projection`):
+
+```
+  "iso" (default)                    "2d"
+
+          (0,0)                       (0,0) ──────▶ +x
+          ╱    ╲                        │
+     +y ╱        ╲ +x                   │
+       ▼          ▼                     ▼ +y
+```
+
+- In **iso**, +x runs towards the lower right of the screen and +y towards the lower left. Height (`h`) goes up.
+- In **2d**, +x runs right and +y down. Heights are ignored.
+
+A node at `"x": 4, "y": 2, "w": 2, "d": 3` covers x 4–6 and y 2–5. Its centre is (5, 3.5). Negative
+coordinates are fine.
+
+## Document
+
+| Field | Type | Default | Notes |
+|---|---|---|---|
+| `format` | `"archipen"` | (required) | |
+| `version` | integer | `1` | File format version. Files with a newer version than the app reads are refused with a message. |
+| `$schema` | string | | Optional path or URL of the JSON Schema, for editors, e.g. `https://archipen.dev/schema/archipen.schema.json`. |
+| `id` | string | generated | Diagram id. |
+| `name` | string | `"Untitled diagram"` | |
+| `settings` | object | all defaults | See [Settings and styles](#settings-and-styles). Every field is optional. |
+| `pages` | array | one empty page | At least one. See [Pages and links](#pages-and-links). |
+| `assets` | object | `{}` | Custom SVG icons by id, shared by all pages. |
+
+All items share these fields: `id` (required), `name` (`""`; the visible label), `description` (`""`; longer text
+shown when a share link is open) and `label` (overrides for the label style; see [Labels](#labels)).
+
+Two optional flags work on every item. Leave them out unless they are `true`:
+
+- `locked`: the item can be selected and restyled, but not moved, resized or bent on the canvas, so a locked zone no
+  longer gets dragged by accident. Box selection and select-all skip it. A locked zone locks everything inside it.
+- `hidden`: the item isn't drawn anywhere: not on the canvas, not in view or present mode, and not in exports. A hidden
+  zone hides everything inside it, and a wire is hidden when either of its ends is.
+
+## Pages and links
+
+A diagram holds one or more pages. The first page opens first. Settings, styles and custom icons belong to the whole
+diagram, so every page looks alike.
+
+| Field | Default | Notes |
+|---|---|---|
+| `id` | (required) | Unique among pages. Links refer to it. |
+| `name` | `""` | Shown in the page list and next to the diagram name. |
+| `description` | `""` | |
+| `nodes`, `zones`, `edges`, `texts` | `[]` | The items on this page. |
+
+A node or zone can **link** to another page with `"link": { "page": "<page id>" }`. In view and present mode,
+clicking it opens that page; the page list (or `Alt+←`) leads back. Use this for drill-down: an overview page with one node
+per service, and a page per service showing what's inside.
+
+```json
+{
+  "format": "archipen",
+  "name": "Shop",
+  "pages": [
+    {
+      "id": "overview",
+      "name": "Overview",
+      "nodes": [
+        { "id": "web", "name": "Web app", "x": 0, "y": 0 },
+        { "id": "checkout", "name": "Checkout", "x": 4, "y": 0, "link": { "page": "checkout" } }
+      ],
+      "edges": [{ "id": "web-checkout", "from": { "nodeId": "web" }, "to": { "nodeId": "checkout" } }]
+    },
+    {
+      "id": "checkout",
+      "name": "Checkout",
+      "nodes": [
+        { "id": "cart", "name": "Cart API", "x": 0, "y": 0 },
+        { "id": "payments", "name": "Payments", "x": 4, "y": 0 }
+      ],
+      "edges": [{ "id": "cart-payments", "from": { "nodeId": "cart" }, "to": { "nodeId": "payments" } }]
+    }
+  ]
+}
+```
+
+- Wires stay on their page. To show that the overview's "Checkout" is the same thing as a detail page, link it;
+  don't wire across pages.
+- Links may go in any direction, and loops are fine.
+- SVG export puts every page in one file, and clicking a linked item there shows its page. PDF has one PDF page per
+  diagram page, and PNG shows one page. All of them can also export a single page; see
+  [Export → Pages](export.md#pages).
+
+## Nodes
+
+Boxes, cylinders, tiles or bare icons standing on the grid.
+
+| Field | Default | Notes |
+|---|---|---|
+| `x`, `y` | (required) | Corner with the smallest x and y. |
+| `w`, `d` | `2`, `2` | Size along x and along y. |
+| `h` | `1` | Height. `0` = flat. Try `0.6` for low boxes and `1.4` for tall ones. |
+| `icon` | none | `"lucide:<name>"`, `"vendor:<name>"` or `"custom:<assetId>"`. |
+| `shape` | `"block"` | `"block"`, `"cylinder"` (databases, storage), `"flat"` (a tile on the ground), or `"icon"` (just the icon, e.g. for people or devices). |
+| `color` | `"#5b7cfa"` | Fill colour. |
+| `outline` | `1` | Outline width in px (0–6). |
+| `iconPlacement` | `"top"` | `"top"` (on the top face), `"billboard"` (standing, facing the viewer), `"wall-x"` or `"wall-y"` (on a side face). Use `"billboard"` with `"shape": "icon"`. |
+| `iconScale` | `1` | Icon size multiplier. |
+| `iconColor` | `""` | `""` = automatic: the brand colour for vendor icons (unless it would be hard to see), otherwise a contrast colour. |
+| `link` | none | `{ "page": "<page id>" }`: opens that page when clicked in view or present mode. |
+
+Style fields (`shape` to `iconColor`) left out inherit from `settings.styles.node`.
+
+## Zones
+
+Rectangles on the ground: networks, accounts, regions, teams. Moving a zone in the editor moves everything inside it.
+
+| Field | Default | Notes |
+|---|---|---|
+| `x`, `y`, `w`, `d` | (required) | Same meaning as for nodes. |
+| `color` | `"#5b7cfa"` | Tint and border colour. |
+| `dashed` | `false` | Dashed border. |
+| `border` | `1.5` | Border width in px (0–8). |
+| `fill` | `1` | Tint strength (0–4). |
+| `link` | none | `{ "page": "<page id>" }`, as for nodes. |
+
+**Membership comes from position.** When the file loads, each node (and note) joins the smallest zone that contains
+its centre (for plain text, its anchor point). Each zone joins the smallest larger zone that contains it
+completely. So:
+
+- To put a node in a zone, place it inside the zone's rectangle.
+- Nested zones must lie **completely** inside their parent.
+- Zones that only partly overlap trigger a warning: they look broken.
+
+## Edges (wires)
+
+| Field | Default | Notes |
+|---|---|---|
+| `from`, `to` | (required) | `{ "nodeId": "...", "port": "e" }` for a node, or `{ "zoneId": "..." }` to attach to a zone's border. Give exactly one of the two. `port` is optional; leave it out to choose automatically. |
+| `name` | `""` | Label on the wire, e.g. a protocol. |
+| `waypoints` | `[]` | Bend points in grid units. Leave empty for automatic right-angle routing. |
+| `labelAt` | `0.5` | Label position along the wire, 0–1. |
+| `arrows` | `"end"` | `"none"`, `"end"`, `"start"`, `"both"`. |
+| `style` | `"solid"` | `"solid"`, `"dashed"`, `"dotted"`. |
+| `color` | `"#6b7488"` | |
+| `width` | `2` | Line width in px. |
+| `arrowSize` | `1` | Arrowhead size multiplier. |
+| `flow` | `{ "enabled": true, "direction": "forward", "speed": 1 }` | Animated dots along the wire. Give only the fields you change, e.g. `{ "enabled": false }`. `direction` is `"forward"` (from → to), `"backward"` or `"both"`. |
+
+Ports are sides of the node or zone: `"n"` is the −y side, `"s"` the +y side, `"w"` the −x side and `"e"` the +x side. In iso, `"s"`
+and `"e"` are the two front faces, which you can see; `"n"` and `"w"` face away from you.
+
+## Texts and notes
+
+| Field | Default | Notes |
+|---|---|---|
+| `kind` | (required) | `"text"`: free text on the ground; `name` is the text. `"note"`: a sticky note; `name` is the title and `description` the body. |
+| `x`, `y` | (required) | Text: the anchor point (the text is centred on it). Note: the corner with the smallest x and y. |
+| `w`, `d` | `3`, `2` | Note size; ignored for plain text. |
+| `color` | `""` | Text colour, or the paper colour of a note. `""` = default. |
+
+Plain text lies flat on the ground by default (label orientation `"ground-x"`). For a title that faces the screen,
+add `"label": { "orientation": "screen", "fontSize": 22 }`.
+
+## Settings and styles
+
+```json
+"settings": {
+  "projection": "iso",
+  "crossing": "hop",
+  "grid": true,
+  "labelDefaults": { "node": {}, "zone": {}, "edge": {}, "text": {} },
+  "styles": { "node": {}, "zone": {}, "edge": {}, "text": {}, "note": {} }
+}
+```
+
+- `projection`: `"iso"` or `"2d"`.
+- `crossing`: how crossing wires are drawn: `"hop"`, `"gap"` or `"none"`.
+- `grid`: show the ground grid.
+- `styles`: diagram-wide defaults per kind of item. An item that doesn't set a style field inherits it from here.
+  `styles.node` also has `w`, `d`, `h` and `icon`; `styles.note` has `w` and `d`. These only apply to items created
+  later in the editor.
+- `labelDefaults`: the label style per kind of item (see [Labels](#labels)).
+
+Every level is optional and merges field by field over the built-in defaults. So
+`"settings": { "styles": { "edge": { "flow": { "enabled": false } } } }` turns off flow animation everywhere and
+changes nothing else. To give many items the same look, set it once in `styles` instead of on each item.
+
+## Labels
+
+An item's `name` is drawn as its label. The label style comes from `settings.labelDefaults[kind]`, and the item's own
+`label` object can override single fields:
+
+| Field | Values |
+|---|---|
+| `side` | `"top"`, `"bottom"`, `"left"`, `"right"`, `"center"` |
+| `align` | `"start"`, `"middle"`, `"end"` (position along that side) |
+| `orientation` | `"screen"` (faces the viewer), `"ground-x"`/`"ground-y"` (flat on the ground along that axis), `"wall-x"`/`"wall-y"` (standing along that axis) |
+| `inside` | `true` puts the label just inside the outline |
+| `offset` | distance from the outline, px |
+| `fontSize` | px, 4–200 |
+| `showDescription` | also show `description` under the name |
+| `hidden` | hide the label |
+
+The defaults: node labels sit below and face the screen; zone labels lie inside along the bottom edge; edge labels sit
+above the wire; texts are centred and lie flat.
+
+## Custom icons (assets)
+
+```json
+"assets": {
+  "logo": { "id": "logo", "name": "Our logo", "viewBox": [0, 0, 24, 24], "body": "<path d=\"M2 2h20v20H2z\"/>" }
+}
+```
+
+Reference one as `"icon": "custom:logo"`. `body` is the markup *inside* `<svg>`. When the file loads, the markup is
+cleaned: only plain SVG elements are kept, and scripts, event handlers, external links and HTML are removed. Built-in
+or vendor icons are usually the better choice, and an AI should prefer them.
+
+## What happens on load
+
+When the editor opens a file, or `npm run validate` checks one, it:
+
+1. Checks the file against the schema. Missing fields get their defaults.
+2. Works out zone membership from positions, page by page.
+3. Cleans custom icon markup.
+4. Checks the rules the schema can't express:
+   - **Errors** stop the file from loading: items at the top level instead of in `pages`, duplicate ids (items or
+     pages), or a wire pointing to a node that doesn't exist, is on another page, or is a zone or text.
+   - **Warnings** load but will look wrong: unknown icon names, links to pages that don't exist or to the item's own
+     page, overlapping nodes, zones that partly overlap.
+
+`npm run validate -- --strict file.archipen.json` also fails on warnings. Use it to check generated files.
+
+## Layout tips
+
+These help a generated diagram look like one a person drew:
+
+- Lay the main flow along **+x** (left to right on paper, towards the lower right in iso). Put parallel tiers or
+  replicas along **+y**.
+- Use the default 2×2 node size, on a pitch of about **4 units**: x = 0, 4, 8, … This leaves room for labels and wires.
+- Leave about **1 unit** of padding between a zone's border and the nodes inside it. Leave at least 1 unit between
+  sibling zones.
+- Use `"shape": "cylinder"` for databases and storage, and `"shape": "icon"` with `"iconPlacement": "billboard"` for
+  people, browsers and devices outside the system.
+- Keep names short (1–3 words). Put details in `description`.
+- Colour by role, not at random, using the palette: `#5b7cfa` indigo, `#2fb5a0` teal, `#f2a93b` amber, `#e5604f`
+  coral, `#9b6cf0` violet, `#4aa3df` sky, `#7dbb52` green, `#8a94a6` slate.
+- Use one wire per relationship. Name it only when it adds something (a protocol, "jobs", "events"). Use
+  `"style": "dashed"` for async or optional paths.
+
+## Use with AI agents
+
+The [`skills/archipen`](https://github.com/archipen-dev/archipen/tree/main/skills/archipen) folder is an [agent skill](https://agentskills.io): the rules below, the
+icon names, examples, and a loop that has the agent validate and render its file with
+[`npx @archipen/render`](export.md), look at the picture and fix the layout.
+
+- **Claude Code:** `/plugin install archipen --marketplace archipen-dev/archipen`.
+- **claude.ai:** download [archipen-skill.zip](https://archipen.dev/archipen-skill.zip) and upload it
+  under Settings → Capabilities → Skills.
+- **Other agents** that read skills: copy `skills/archipen/` to where they look for skills.
+
+It is generated from this page by `npm run schema`, so it always matches the format.
+
+## Prompt for AI generation
+
+For a chat without skills, paste this together with your request. Attach `schema/archipen.schema.json` too if you can.
+
+```text
+Create an Archipen diagram as a single JSON object (a *.archipen.json file). Rules:
+- Top level: {"format": "archipen", "name": ..., "pages": [{"id": "main", "name": ..., "nodes": [...],
+  "zones": [...], "edges": [...], "texts": [...]}]}. Items always go inside a page.
+  Omit any field whose default is fine; do not output settings unless you change something.
+- Use one page unless asked for drill-down. Then make an overview page, one page per detail, and give the
+  overview's node or zone "link": {"page": "<detail page id>"}. Wires only connect items on the same page.
+- Every item has an "id" that is unique across all items on all pages. Use short readable ids ("api", "db", "e-api-db").
+- Units are grid cells. x/y is the corner with the smallest x and y. Nodes default to w=2, d=2, h=1.
+  Place nodes about 4 units apart, main flow along +x, parallel tiers along +y.
+- Node shapes: "block" (default), "cylinder" for databases/storage, "flat", or "icon" (with
+  "iconPlacement": "billboard") for users/devices. Icons: "lucide:<name>" from this list only: <ICON LIST>.
+  For a named product (Kubernetes, Postgres, Redis, ...) prefer "vendor:<name>" from this list only: <VENDOR LIST>.
+- Colours: 6-digit hex only, e.g. #5b7cfa indigo, #2fb5a0 teal, #f2a93b amber, #e5604f coral, #9b6cf0 violet,
+  #4aa3df sky, #7dbb52 green, #8a94a6 slate.
+- Zones are rectangles {"id", "name", "x", "y", "w", "d"} drawn around the nodes they contain, with about
+  1 unit of padding. Nested zones must lie completely inside their parent. Never set zoneId or parentZoneId.
+- Edges: {"id", "from": {"nodeId"}, "to": {"nodeId"}}, optional "name" (short label), "style": "dashed" for async.
+  An end may use {"zoneId"} instead, to point at a whole zone. Don't set waypoints or ports unless asked.
+- Notes: {"id", "kind": "note", "name": title, "description": body, "x", "y"}.
+- Output only the JSON.
+```
+
+Replace `<ICON LIST>` and `<VENDOR LIST>` with the names below. If the AI can run commands, have it run
+`npm run validate -- --strict <file>` and fix everything reported.
+
+## Built-in icons
+
+Use these as `"lucide:<name>"`:
+
+<!-- icons:start (generated by `npm run schema`) -->
+`activity`, `anchor`, `antenna`, `app-window`, `archive`, `arrow-left-right`, `bar-chart-3`, `bell`, `binary`, `blocks`, `bot`, `box`, `boxes`, `braces`, `brain`, `bug`, `building`, `building-2`, `cable`, `calendar`, `camera`, `car`, `chart-line`, `chart-pie`, `circle-alert`, `clock`, `cloud`, `cloud-cog`, `cloud-rain`, `code`, `cog`, `coins`, `combine`, `component`, `container`, `cpu`, `credit-card`, `cylinder`, `database`, `database-backup`, `database-zap`, `download`, `eye`, `factory`, `file`, `file-text`, `filter`, `fingerprint`, `flag`, `flame`, `folder`, `folder-open`, `gamepad-2`, `gauge`, `git-branch`, `git-merge`, `globe`, `hammer`, `hard-drive`, `hard-drive-download`, `hash`, `headphones`, `heart`, `home`, `image`, `inbox`, `info`, `kanban`, `key`, `landmark`, `laptop`, `layers`, `layers-2`, `layout-dashboard`, `leaf`, `lightbulb`, `link`, `list-todo`, `lock`, `mail`, `map`, `map-pin`, `memory-stick`, `merge`, `message-square`, `microchip`, `monitor`, `moon`, `music`, `navigation`, `network`, `package`, `panels-top-left`, `phone`, `plane`, `plug`, `printer`, `puzzle`, `radio`, `receipt`, `refresh-cw`, `repeat`, `rocket`, `router`, `rss`, `satellite`, `scale`, `search`, `send`, `server`, `server-cog`, `settings`, `share-2`, `sheet`, `shield`, `shield-check`, `ship`, `shopping-cart`, `shuffle`, `signal`, `smartphone`, `sparkles`, `split`, `star`, `store`, `sun`, `table`, `tablet`, `terminal`, `thumbs-up`, `ticket`, `timer`, `train`, `triangle-alert`, `truck`, `tv`, `upload`, `user`, `users`, `video`, `wallet`, `warehouse`, `watch`, `waypoints`, `webhook`, `wifi`, `workflow`, `wrench`, `zap`
+<!-- icons:end -->
+
+## Vendor icons
+
+Product logos (about 300, grouped by category below), used as `"vendor:<name>"`. They are drawn in the brand colour unless the node sets `iconColor`, or the
+brand colour would be hard to see against what's behind it.
+
+<!-- vendor-icons:start (generated by `npm run schema`) -->
+- **Hosting & cloud:** `akamai`, `alibabacloud`, `appwrite`, `backblaze`, `bunnydotnet`, `caprover`, `cloudflare`, `cloudflarepages`, `cloudflareworkers`, `cloudron`, `contabo`, `coolify`, `digitalocean`, `fastly`, `fauna`, `firebase`, `flydotio`, `githubpages`, `godaddy`, `googlebigquery`, `googlecloud`, `googlecloudstorage`, `hetzner`, `hostinger`, `ionos`, `koyeb`, `namecheap`, `neon`, `netlify`, `openstack`, `ovh`, `planetscale`, `pocketbase`, `proxmox`, `railway`, `render`, `scaleway`, `supabase`, `turso`, `upcloud`, `upstash`, `vercel`, `vmware`, `vultr`, `wasabi`
+- **Cloud native:** `apache`, `apachetomcat`, `argo`, `backstage`, `caddy`, `cilium`, `cncf`, `consul`, `containerd`, `dapr`, `docker`, `envoyproxy`, `etcd`, `falco`, `helm`, `istio`, `k3s`, `knative`, `kong`, `kubernetes`, `lens`, `linkerd`, `longhorn`, `natsdotio`, `nginx`, `nomad`, `podman`, `portainer`, `rancher`, `redhatopenshift`, `rook`, `skaffold`, `traefikproxy`, `vault`, `vitess`
+- **CI/CD & DevOps:** `ansible`, `apachemaven`, `appveyor`, `bamboo`, `bazel`, `bitbucket`, `bitrise`, `buildkite`, `checkmarx`, `chef`, `circleci`, `cmake`, `codeberg`, `codecov`, `codemagic`, `concourse`, `dependabot`, `drone`, `fastlane`, `git`, `gitea`, `github`, `githubactions`, `gitlab`, `gradle`, `jfrog`, `make`, `npm`, `nx`, `octopusdeploy`, `opentofu`, `packer`, `pnpm`, `pulumi`, `puppet`, `renovate`, `semaphoreci`, `snyk`, `sonar`, `sonatype`, `spinnaker`, `teamcity`, `tekton`, `terraform`, `travisci`, `trivy`, `turborepo`, `vagrant`, `yarn`
+- **Programming languages:** `assemblyscript`, `bun`, `c`, `clojure`, `commonlisp`, `cplusplus`, `crystal`, `dart`, `dotnet`, `elixir`, `elm`, `erlang`, `fortran`, `fsharp`, `gleam`, `go`, `haskell`, `julia`, `kotlin`, `lua`, `nim`, `nodedotjs`, `ocaml`, `perl`, `purescript`, `python`, `racket`, `scala`, `solidity`, `swift`, `typescript`, `webassembly`
+- **Data & messaging:** `algolia`, `apacheairflow`, `apachecassandra`, `apacheflink`, `apachehadoop`, `apachekafka`, `apachepulsar`, `apachesolr`, `apachespark`, `ceph`, `clickhouse`, `cockroachlabs`, `couchbase`, `databricks`, `drizzle`, `duckdb`, `eclipsemosquitto`, `elasticsearch`, `hasura`, `influxdb`, `mariadb`, `meilisearch`, `minio`, `mongodb`, `mqtt`, `mysql`, `neo4j`, `opensearch`, `postgresql`, `presto`, `prisma`, `rabbitmq`, `redis`, `scylladb`, `snowflake`, `sqlite`, `timescale`, `trino`
+- **Observability:** `datadog`, `elastic`, `fluentbit`, `fluentd`, `grafana`, `jaeger`, `k6`, `kibana`, `logstash`, `newrelic`, `opentelemetry`, `pagerduty`, `prometheus`, `sentry`, `splunk`, `thanos`
+- **Frameworks:** `angular`, `apollographql`, `django`, `fastapi`, `flask`, `graphql`, `nextdotjs`, `nuxt`, `react`, `rubyonrails`, `spring`, `springboot`, `svelte`
+- **AI & ML:** `anthropic`, `huggingface`, `jupyter`, `langchain`, `nvidia`, `ollama`, `pytorch`, `tensorflow`
+- **Technology:** `1password`, `almalinux`, `alpinelinux`, `amd`, `android`, `apple`, `archlinux`, `arduino`, `arm`, `auth0`, `bitwarden`, `centos`, `cisco`, `citrix`, `dell`, `espressif`, `fortinet`, `freebsd`, `google`, `hashicorp`, `hp`, `huawei`, `intel`, `ios`, `jetbrains`, `json`, `lenovo`, `linux`, `macos`, `markdown`, `meta`, `mikrotik`, `nixos`, `nutanix`, `okta`, `openapiinitiative`, `openid`, `openssl`, `opensuse`, `openvpn`, `openwrt`, `paloaltonetworks`, `pfsense`, `postman`, `qualcomm`, `raspberrypi`, `redhat`, `samsung`, `suse`, `swagger`, `synology`, `tailscale`, `toml`, `tplink`, `truenas`, `ubiquiti`, `ubuntu`, `unraid`, `vim`, `wireguard`, `xiaomi`, `yaml`, `zerotier`
+- **Services:** `atlassian`, `cloudinary`, `confluence`, `discord`, `jira`, `notion`, `paypal`, `sap`, `shopify`, `stripe`, `wordpress`, `zoom`
+<!-- vendor-icons:end -->
+
+The logos come from [Simple Icons](https://simpleicons.org). Most are CC0. A few (Kafka and other Apache projects,
+Git, Angular, Android, OpenTelemetry, Yarn, Gleam and others) are under Apache-2.0 or CC-BY, which only ask for credit. They are credited in
+[`app/public/vendor-icon-credits.txt`](../app/public/vendor-icon-credits.txt), linked from the icon picker. If you publish a
+diagram that uses one, credit it the same way. Logos under licences with more conditions are left out: share-alike (Jenkins, Rust, PHP, Ruby, R, Zig, Debian),
+MIT or BSD (JavaScript, Deno, Bash, OpenJDK), non-commercial or custom (Let's Encrypt, Fedora, Flux, Harbor). Some
+brands aren't in Simple Icons at all: AWS, Azure, Java, C#, Windows, Slack. Use a custom icon for those.
+The logos are trademarks of their owners. To change the set, edit the lists in `app/scripts/vendor-icons.mjs` (`CORE` names the logos that load
+with the app; the rest load when the icon picker opens or a diagram uses one), then run `npm run icons:vendor` and
+`npm run schema`.
+
+## Changing the format
+
+The format is defined in `app/src/model/schema.ts`. Default values live in `app/src/model/constants.ts`, and loading and
+checks in `app/src/model/parse.ts`. When you change any of them:
+
+1. Update this page.
+2. Run `npm run schema`. It regenerates the JSON Schema and the icon lists above.
+3. Keep `examples/` loading cleanly. `npm test` fails if the schema, the icon lists or an example is out of date.
+4. For a breaking change, increase `FILE_VERSION` in `constants.ts` and teach `parse.ts` to upgrade older files.

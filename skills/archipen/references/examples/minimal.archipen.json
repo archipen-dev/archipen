@@ -1,0 +1,18 @@
+{
+  "$schema": "../../assets/archipen.schema.json",
+  "format": "archipen",
+  "name": "Minimal",
+  "pages": [
+    {
+      "id": "main",
+      "name": "Main",
+      "nodes": [
+        { "id": "app", "name": "App", "x": 0, "y": 0, "icon": "lucide:server" },
+        { "id": "db", "name": "Database", "x": 5, "y": 0, "shape": "cylinder", "icon": "lucide:database", "color": "#2fb5a0" }
+      ],
+      "edges": [
+        { "id": "app-db", "name": "SQL", "from": { "nodeId": "app" }, "to": { "nodeId": "db" } }
+      ]
+    }
+  ]
+}

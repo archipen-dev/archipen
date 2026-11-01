@@ -1,0 +1,66 @@
+{
+  "$schema": "../schema/archipen.schema.json",
+  "format": "archipen",
+  "name": "Web shop, drill-down",
+  "settings": { "crossing": "gap" },
+  "pages": [
+    {
+      "id": "overview",
+      "name": "Overview",
+      "description": "Click Checkout or the Data zone to see inside.",
+      "zones": [
+        { "id": "data", "name": "Data", "x": 14, "y": -1, "w": 5, "d": 9, "color": "#2fb5a0", "link": { "page": "data-detail" } }
+      ],
+      "nodes": [
+        { "id": "users", "name": "Customers", "x": 0, "y": 2, "shape": "icon", "iconPlacement": "billboard", "icon": "lucide:users", "color": "#8a94a6" },
+        { "id": "web", "name": "Web app", "x": 5, "y": 2, "icon": "lucide:monitor" },
+        { "id": "checkout", "name": "Checkout", "description": "Cart, payments and orders", "x": 9, "y": 2, "icon": "lucide:shopping-cart", "color": "#f2a93b", "link": { "page": "checkout-detail" } },
+        { "id": "orders-db", "name": "Orders DB", "x": 15, "y": 0, "h": 1.4, "shape": "cylinder", "icon": "lucide:database", "color": "#2fb5a0" },
+        { "id": "search", "name": "Search", "x": 15, "y": 4, "icon": "lucide:search", "color": "#4aa3df" }
+      ],
+      "edges": [
+        { "id": "users-web", "name": "HTTPS", "from": { "nodeId": "users" }, "to": { "nodeId": "web" } },
+        { "id": "web-checkout", "from": { "nodeId": "web" }, "to": { "nodeId": "checkout" } },
+        { "id": "checkout-data", "name": "SQL", "from": { "nodeId": "checkout" }, "to": { "zoneId": "data" } }
+      ]
+    },
+    {
+      "id": "checkout-detail",
+      "name": "Checkout",
+      "description": "Inside the checkout service.",
+      "zones": [
+        { "id": "checkout-svc", "name": "Checkout service", "x": -1, "y": -1, "w": 15, "d": 6, "color": "#f2a93b" }
+      ],
+      "nodes": [
+        { "id": "cart", "name": "Cart API", "x": 0, "y": 0, "icon": "lucide:server" },
+        { "id": "payments", "name": "Payments", "x": 5, "y": 0, "icon": "lucide:credit-card", "color": "#9b6cf0" },
+        { "id": "order-worker", "name": "Order worker", "x": 10, "y": 0, "icon": "lucide:cog", "color": "#e5604f" },
+        { "id": "psp", "name": "Payment provider", "x": 5, "y": 7, "h": 0.6, "icon": "lucide:landmark", "color": "#8a94a6" }
+      ],
+      "edges": [
+        { "id": "cart-payments", "from": { "nodeId": "cart" }, "to": { "nodeId": "payments" } },
+        { "id": "payments-worker", "name": "events", "from": { "nodeId": "payments" }, "to": { "nodeId": "order-worker" }, "style": "dashed" },
+        { "id": "payments-psp", "name": "API", "from": { "nodeId": "payments" }, "to": { "nodeId": "psp" } }
+      ]
+    },
+    {
+      "id": "data-detail",
+      "name": "Data",
+      "zones": [
+        { "id": "primary", "name": "Primary region", "x": -1, "y": -1, "w": 12, "d": 6, "color": "#2fb5a0" }
+      ],
+      "nodes": [
+        { "id": "pg-primary", "name": "Postgres primary", "x": 0, "y": 0, "h": 1.4, "shape": "cylinder", "icon": "lucide:database", "color": "#2fb5a0" },
+        { "id": "pg-replica", "name": "Read replica", "x": 7, "y": 0, "h": 1.4, "shape": "cylinder", "icon": "lucide:database", "color": "#7dbb52" },
+        { "id": "index", "name": "Search index", "x": 15, "y": 0, "icon": "lucide:search", "color": "#4aa3df" }
+      ],
+      "edges": [
+        { "id": "pg-replication", "name": "replication", "from": { "nodeId": "pg-primary" }, "to": { "nodeId": "pg-replica" } },
+        { "id": "replica-index", "name": "CDC", "from": { "nodeId": "pg-replica" }, "to": { "nodeId": "index" }, "style": "dashed" }
+      ],
+      "texts": [
+        { "id": "backup-note", "kind": "note", "name": "Backups", "description": "Nightly snapshots, kept 30 days", "x": 0, "y": 6, "w": 4, "d": 2 }
+      ]
+    }
+  ]
+}

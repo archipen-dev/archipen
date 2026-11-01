@@ -1,0 +1,41 @@
+# Archipen static server. Both settings are read when the container starts:
+#   PORT       port to listen on (default 8080)
+#   BASE_PATH  URL path to serve under, e.g. /tools/archipen (no trailing slash; empty = site root)
+{
+	admin off
+	auto_https off
+	persist_config off
+}
+
+:{$PORT:8080} {
+	# /tools/archipen → /tools/archipen/, so the app's relative URLs resolve inside the folder.
+	@bare expression `{path} == "{$BASE_PATH}"`
+	redir @bare {$BASE_PATH}/ 308
+
+	handle_path {$BASE_PATH}/* {
+		root * /srv
+		encode zstd gzip
+
+		# Built assets have content hashes in their names. index.html, the service worker and the manifest must always
+		# be fresh, or visitors never see a new version.
+		@hashed path /assets/*
+		header @hashed Cache-Control "public, max-age=31536000, immutable"
+		@fresh path / /index.html /sw.js /manifest.webmanifest
+		header @fresh Cache-Control "no-cache"
+
+		# The policy from app/csp.ts (CSP_HEADER); keep them in sync. The app is never shown inside a frame.
+		header {
+			Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' ws://127.0.0.1:*; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
+			X-Frame-Options DENY
+			Cross-Origin-Opener-Policy same-origin
+			Permissions-Policy "camera=(), microphone=(), geolocation=()"
+			X-Content-Type-Options nosniff
+			Referrer-Policy no-referrer
+		}
+		file_server
+	}
+
+	handle {
+		respond "Not found" 404
+	}
+}

@@ -1,0 +1,46 @@
+{
+  "$schema": "../schema/archipen.schema.json",
+  "format": "archipen",
+  "name": "Event-driven services",
+  "pages": [
+    {
+      "id": "main",
+      "name": "Main",
+      "zones": [
+        { "id": "producers", "name": "Producers", "x": 9, "y": 0, "w": 5, "d": 10, "color": "#5b7cfa" },
+        { "id": "consumers", "name": "Consumers", "x": 21, "y": -1, "w": 5, "d": 13, "color": "#2fb5a0" }
+      ],
+      "nodes": [
+        { "id": "mobile", "name": "Mobile app", "x": 0, "y": 1, "shape": "icon", "iconPlacement": "billboard", "icon": "lucide:smartphone", "color": "#8a94a6" },
+        { "id": "browser", "name": "Browser", "x": 0, "y": 6, "shape": "icon", "iconPlacement": "billboard", "icon": "lucide:monitor", "color": "#8a94a6" },
+        { "id": "gateway", "name": "API gateway", "x": 4, "y": 3.5, "h": 0.6, "icon": "lucide:waypoints", "color": "#4aa3df" },
+        { "id": "orders", "name": "Orders", "x": 10, "y": 1, "icon": "lucide:shopping-cart", "color": "#5b7cfa" },
+        { "id": "payments", "name": "Payments", "x": 10, "y": 6, "icon": "lucide:credit-card", "color": "#5b7cfa" },
+        { "id": "bus", "name": "Event bus", "description": "Kafka topics: orders, payments", "x": 17, "y": 3, "d": 3, "h": 0.6, "icon": "vendor:apachekafka", "color": "#f2a93b" },
+        { "id": "inventory", "name": "Inventory", "x": 22, "y": 0, "icon": "lucide:boxes", "color": "#2fb5a0" },
+        { "id": "notifications", "name": "Notifications", "x": 22, "y": 4, "icon": "lucide:bell", "color": "#2fb5a0" },
+        { "id": "analytics", "name": "Analytics", "x": 22, "y": 8, "icon": "lucide:chart-line", "color": "#2fb5a0" },
+        { "id": "stock-db", "name": "Stock", "x": 28, "y": 0, "h": 1.4, "shape": "cylinder", "icon": "vendor:postgresql", "color": "#9b6cf0" },
+        { "id": "email", "name": "Email", "x": 28, "y": 4, "shape": "icon", "iconPlacement": "billboard", "icon": "lucide:mail", "color": "#8a94a6" },
+        { "id": "warehouse", "name": "Warehouse", "x": 28, "y": 8, "h": 1.4, "shape": "cylinder", "icon": "lucide:warehouse", "color": "#9b6cf0" }
+      ],
+      "edges": [
+        { "id": "e-mobile-gateway", "from": { "nodeId": "mobile" }, "to": { "nodeId": "gateway" } },
+        { "id": "e-browser-gateway", "from": { "nodeId": "browser" }, "to": { "nodeId": "gateway" } },
+        { "id": "e-gateway-orders", "from": { "nodeId": "gateway" }, "to": { "nodeId": "orders" } },
+        { "id": "e-gateway-payments", "from": { "nodeId": "gateway" }, "to": { "nodeId": "payments" } },
+        { "id": "e-orders-bus", "name": "OrderPlaced", "from": { "nodeId": "orders" }, "to": { "nodeId": "bus" }, "style": "dashed" },
+        { "id": "e-payments-bus", "name": "PaymentSettled", "from": { "nodeId": "payments" }, "to": { "nodeId": "bus" }, "style": "dashed" },
+        { "id": "e-bus-inventory", "from": { "nodeId": "bus" }, "to": { "nodeId": "inventory" }, "style": "dashed" },
+        { "id": "e-bus-notifications", "from": { "nodeId": "bus" }, "to": { "nodeId": "notifications" }, "style": "dashed" },
+        { "id": "e-bus-analytics", "from": { "nodeId": "bus" }, "to": { "nodeId": "analytics" }, "style": "dashed" },
+        { "id": "e-inventory-stock", "from": { "nodeId": "inventory" }, "to": { "nodeId": "stock-db" } },
+        { "id": "e-notifications-email", "from": { "nodeId": "notifications" }, "to": { "nodeId": "email" } },
+        { "id": "e-analytics-warehouse", "from": { "nodeId": "analytics" }, "to": { "nodeId": "warehouse" } }
+      ],
+      "texts": [
+        { "id": "note-async", "kind": "note", "name": "Async by default", "description": "Services never call each other directly. Dashed wires go through the event bus.", "x": 9, "y": 11, "w": 5, "d": 3 }
+      ]
+    }
+  ]
+}

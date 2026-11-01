@@ -1,0 +1,2351 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://archipen.dev/schema/archipen.schema.json",
+  "title": "Archipen diagram",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "description": "Optional path or URL of the JSON Schema, for editors, e.g. https://archipen.dev/schema/archipen.schema.json.",
+      "type": "string"
+    },
+    "format": {
+      "type": "string",
+      "const": "archipen",
+      "description": "Always \"archipen\"."
+    },
+    "version": {
+      "default": 1,
+      "description": "File format version. Currently 1; files with a newer version are refused.",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+    "id": {
+      "default": "",
+      "description": "Diagram id. Generated on load if missing or empty.",
+      "type": "string"
+    },
+    "name": {
+      "default": "Untitled diagram",
+      "type": "string"
+    },
+    "settings": {
+      "description": "All fields optional; missing ones take the built-in defaults.",
+      "default": {},
+      "type": "object",
+      "properties": {
+        "projection": {
+          "default": "iso",
+          "type": "string",
+          "enum": [
+            "iso",
+            "2d"
+          ],
+          "description": "\"iso\" isometric 3D view or \"2d\" top-down plan."
+        },
+        "crossing": {
+          "default": "hop",
+          "type": "string",
+          "enum": [
+            "hop",
+            "gap",
+            "none"
+          ],
+          "description": "How crossing wires are drawn."
+        },
+        "grid": {
+          "default": true,
+          "type": "boolean",
+          "description": "Show the ground grid."
+        },
+        "labelDefaults": {
+          "default": {},
+          "type": "object",
+          "properties": {
+            "node": {
+              "default": {},
+              "type": "object",
+              "properties": {
+                "side": {
+                  "default": "bottom",
+                  "type": "string",
+                  "enum": [
+                    "top",
+                    "bottom",
+                    "left",
+                    "right",
+                    "center"
+                  ],
+                  "description": "Which side of the item the label sits on, in the text’s own frame."
+                },
+                "align": {
+                  "default": "middle",
+                  "type": "string",
+                  "enum": [
+                    "start",
+                    "middle",
+                    "end"
+                  ],
+                  "description": "Position along that side."
+                },
+                "orientation": {
+                  "default": "screen",
+                  "type": "string",
+                  "enum": [
+                    "screen",
+                    "ground-x",
+                    "ground-y",
+                    "wall-x",
+                    "wall-y"
+                  ],
+                  "description": "How the text is drawn: \"screen\" faces the viewer; \"ground-x\"/\"ground-y\" lie flat on the ground along that axis; \"wall-x\"/\"wall-y\" stand upright along that axis."
+                },
+                "inside": {
+                  "default": false,
+                  "type": "boolean",
+                  "description": "Place the label just inside the item’s outline instead of outside."
+                },
+                "offset": {
+                  "default": 8,
+                  "type": "number",
+                  "description": "Distance from the outline, in px."
+                },
+                "fontSize": {
+                  "default": 13,
+                  "type": "number",
+                  "minimum": 4,
+                  "maximum": 200,
+                  "description": "Font size in px."
+                },
+                "showDescription": {
+                  "default": false,
+                  "type": "boolean",
+                  "description": "Also show the item’s description under its name."
+                },
+                "hidden": {
+                  "default": false,
+                  "type": "boolean",
+                  "description": "Hide the label."
+                }
+              },
+              "description": "How an item’s name is drawn.",
+              "additionalProperties": false
+            },
+            "zone": {
+              "default": {},
+              "type": "object",
+              "properties": {
+                "side": {
+                  "default": "bottom",
+                  "type": "string",
+                  "enum": [
+                    "top",
+                    "bottom",
+                    "left",
+                    "right",
+                    "center"
+                  ],
+                  "description": "Which side of the item the label sits on, in the text’s own frame."
+                },
+                "align": {
+                  "default": "start",
+                  "type": "string",
+                  "enum": [
+                    "start",
+                    "middle",
+                    "end"
+                  ],
+                  "description": "Position along that side."
+                },
+                "orientation": {
+                  "default": "ground-x",
+                  "type": "string",
+                  "enum": [
+                    "screen",
+                    "ground-x",
+                    "ground-y",
+                    "wall-x",
+                    "wall-y"
+                  ],
+                  "description": "How the text is drawn: \"screen\" faces the viewer; \"ground-x\"/\"ground-y\" lie flat on the ground along that axis; \"wall-x\"/\"wall-y\" stand upright along that axis."
+                },
+                "inside": {
+                  "default": true,
+                  "type": "boolean",
+                  "description": "Place the label just inside the item’s outline instead of outside."
+                },
+                "offset": {
+                  "default": 8,
+                  "type": "number",
+                  "description": "Distance from the outline, in px."
+                },
+                "fontSize": {
+                  "default": 14,
+                  "type": "number",
+                  "minimum": 4,
+                  "maximum": 200,
+                  "description": "Font size in px."
+                },
+                "showDescription": {
+                  "default": false,
+                  "type": "boolean",
+                  "description": "Also show the item’s description under its name."
+                },
+                "hidden": {
+                  "default": false,
+                  "type": "boolean",
+                  "description": "Hide the label."
+                }
+              },
+              "description": "How an item’s name is drawn.",
+              "additionalProperties": false
+            },
+            "edge": {
+              "default": {},
+              "type": "object",
+              "properties": {
+                "side": {
+                  "default": "top",
+                  "type": "string",
+                  "enum": [
+                    "top",
+                    "bottom",
+                    "left",
+                    "right",
+                    "center"
+                  ],
+                  "description": "Which side of the item the label sits on, in the text’s own frame."
+                },
+                "align": {
+                  "default": "middle",
+                  "type": "string",
+                  "enum": [
+                    "start",
+                    "middle",
+                    "end"
+                  ],
+                  "description": "Position along that side."
+                },
+                "orientation": {
+                  "default": "screen",
+                  "type": "string",
+                  "enum": [
+                    "screen",
+                    "ground-x",
+                    "ground-y",
+                    "wall-x",
+                    "wall-y"
+                  ],
+                  "description": "How the text is drawn: \"screen\" faces the viewer; \"ground-x\"/\"ground-y\" lie flat on the ground along that axis; \"wall-x\"/\"wall-y\" stand upright along that axis."
+                },
+                "inside": {
+                  "default": false,
+                  "type": "boolean",
+                  "description": "Place the label just inside the item’s outline instead of outside."
+                },
+                "offset": {
+                  "default": 6,
+                  "type": "number",
+                  "description": "Distance from the outline, in px."
+                },
+                "fontSize": {
+                  "default": 11,
+                  "type": "number",
+                  "minimum": 4,
+                  "maximum": 200,
+                  "description": "Font size in px."
+                },
+                "showDescription": {
+                  "default": false,
+                  "type": "boolean",
+                  "description": "Also show the item’s description under its name."
+                },
+                "hidden": {
+                  "default": false,
+                  "type": "boolean",
+                  "description": "Hide the label."
+                }
+              },
+              "description": "How an item’s name is drawn.",
+              "additionalProperties": false
+            },
+            "text": {
+              "default": {},
+              "type": "object",
+              "properties": {
+                "side": {
+                  "default": "center",
+                  "type": "string",
+                  "enum": [
+                    "top",
+                    "bottom",
+                    "left",
+                    "right",
+                    "center"
+                  ],
+                  "description": "Which side of the item the label sits on, in the text’s own frame."
+                },
+                "align": {
+                  "default": "middle",
+                  "type": "string",
+                  "enum": [
+                    "start",
+                    "middle",
+                    "end"
+                  ],
+                  "description": "Position along that side."
+                },
+                "orientation": {
+                  "default": "ground-x",
+                  "type": "string",
+                  "enum": [
+                    "screen",
+                    "ground-x",
+                    "ground-y",
+                    "wall-x",
+                    "wall-y"
+                  ],
+                  "description": "How the text is drawn: \"screen\" faces the viewer; \"ground-x\"/\"ground-y\" lie flat on the ground along that axis; \"wall-x\"/\"wall-y\" stand upright along that axis."
+                },
+                "inside": {
+                  "default": true,
+                  "type": "boolean",
+                  "description": "Place the label just inside the item’s outline instead of outside."
+                },
+                "offset": {
+                  "default": 0,
+                  "type": "number",
+                  "description": "Distance from the outline, in px."
+                },
+                "fontSize": {
+                  "default": 16,
+                  "type": "number",
+                  "minimum": 4,
+                  "maximum": 200,
+                  "description": "Font size in px."
+                },
+                "showDescription": {
+                  "default": true,
+                  "type": "boolean",
+                  "description": "Also show the item’s description under its name."
+                },
+                "hidden": {
+                  "default": false,
+                  "type": "boolean",
+                  "description": "Hide the label."
+                }
+              },
+              "description": "How an item’s name is drawn.",
+              "additionalProperties": false
+            }
+          },
+          "description": "Label style per kind of item. Items can override single fields via `label`.",
+          "additionalProperties": false
+        },
+        "styles": {
+          "default": {},
+          "type": "object",
+          "properties": {
+            "node": {
+              "default": {},
+              "type": "object",
+              "properties": {
+                "shape": {
+                  "default": "block",
+                  "type": "string",
+                  "enum": [
+                    "block",
+                    "cylinder",
+                    "flat",
+                    "icon"
+                  ],
+                  "description": "\"block\" box, \"cylinder\" (databases), \"flat\" tile on the ground, \"icon\" just the icon."
+                },
+                "color": {
+                  "default": "#5b7cfa",
+                  "type": "string",
+                  "pattern": "^#[0-9a-fA-F]{6}$",
+                  "description": "Fill colour, 6-digit hex."
+                },
+                "outline": {
+                  "default": 1,
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 6,
+                  "description": "Outline stroke width, px."
+                },
+                "iconPlacement": {
+                  "default": "top",
+                  "type": "string",
+                  "enum": [
+                    "top",
+                    "billboard",
+                    "wall-x",
+                    "wall-y"
+                  ],
+                  "description": "\"top\" flat on the top face, \"billboard\" standing upright facing the viewer, \"wall-x\"/\"wall-y\" on the side face along that axis."
+                },
+                "iconScale": {
+                  "default": 1,
+                  "type": "number",
+                  "exclusiveMinimum": 0,
+                  "description": "Icon size multiplier."
+                },
+                "iconColor": {
+                  "default": "",
+                  "type": "string",
+                  "pattern": "^(#[0-9a-fA-F]{6})?$",
+                  "description": "Icon colour; \"\" = automatic contrast colour."
+                },
+                "w": {
+                  "default": 2,
+                  "type": "number",
+                  "exclusiveMinimum": 0,
+                  "description": "Width of newly created nodes."
+                },
+                "d": {
+                  "default": 2,
+                  "type": "number",
+                  "exclusiveMinimum": 0,
+                  "description": "Depth of newly created nodes."
+                },
+                "h": {
+                  "default": 1,
+                  "type": "number",
+                  "minimum": 0,
+                  "description": "Height of newly created nodes."
+                },
+                "icon": {
+                  "description": "Icon for newly created nodes; \"\" = none.",
+                  "anyOf": [
+                    {
+                      "enum": [
+                        "",
+                        "lucide:activity",
+                        "lucide:anchor",
+                        "lucide:antenna",
+                        "lucide:app-window",
+                        "lucide:archive",
+                        "lucide:arrow-left-right",
+                        "lucide:bar-chart-3",
+                        "lucide:bell",
+                        "lucide:binary",
+                        "lucide:blocks",
+                        "lucide:bot",
+                        "lucide:box",
+                        "lucide:boxes",
+                        "lucide:braces",
+                        "lucide:brain",
+                        "lucide:bug",
+                        "lucide:building",
+                        "lucide:building-2",
+                        "lucide:cable",
+                        "lucide:calendar",
+                        "lucide:camera",
+                        "lucide:car",
+                        "lucide:chart-line",
+                        "lucide:chart-pie",
+                        "lucide:circle-alert",
+                        "lucide:clock",
+                        "lucide:cloud",
+                        "lucide:cloud-cog",
+                        "lucide:cloud-rain",
+                        "lucide:code",
+                        "lucide:cog",
+                        "lucide:coins",
+                        "lucide:combine",
+                        "lucide:component",
+                        "lucide:container",
+                        "lucide:cpu",
+                        "lucide:credit-card",
+                        "lucide:cylinder",
+                        "lucide:database",
+                        "lucide:database-backup",
+                        "lucide:database-zap",
+                        "lucide:download",
+                        "lucide:eye",
+                        "lucide:factory",
+                        "lucide:file",
+                        "lucide:file-text",
+                        "lucide:filter",
+                        "lucide:fingerprint",
+                        "lucide:flag",
+                        "lucide:flame",
+                        "lucide:folder",
+                        "lucide:folder-open",
+                        "lucide:gamepad-2",
+                        "lucide:gauge",
+                        "lucide:git-branch",
+                        "lucide:git-merge",
+                        "lucide:globe",
+                        "lucide:hammer",
+                        "lucide:hard-drive",
+                        "lucide:hard-drive-download",
+                        "lucide:hash",
+                        "lucide:headphones",
+                        "lucide:heart",
+                        "lucide:home",
+                        "lucide:image",
+                        "lucide:inbox",
+                        "lucide:info",
+                        "lucide:kanban",
+                        "lucide:key",
+                        "lucide:landmark",
+                        "lucide:laptop",
+                        "lucide:layers",
+                        "lucide:layers-2",
+                        "lucide:layout-dashboard",
+                        "lucide:leaf",
+                        "lucide:lightbulb",
+                        "lucide:link",
+                        "lucide:list-todo",
+                        "lucide:lock",
+                        "lucide:mail",
+                        "lucide:map",
+                        "lucide:map-pin",
+                        "lucide:memory-stick",
+                        "lucide:merge",
+                        "lucide:message-square",
+                        "lucide:microchip",
+                        "lucide:monitor",
+                        "lucide:moon",
+                        "lucide:music",
+                        "lucide:navigation",
+                        "lucide:network",
+                        "lucide:package",
+                        "lucide:panels-top-left",
+                        "lucide:phone",
+                        "lucide:plane",
+                        "lucide:plug",
+                        "lucide:printer",
+                        "lucide:puzzle",
+                        "lucide:radio",
+                        "lucide:receipt",
+                        "lucide:refresh-cw",
+                        "lucide:repeat",
+                        "lucide:rocket",
+                        "lucide:router",
+                        "lucide:rss",
+                        "lucide:satellite",
+                        "lucide:scale",
+                        "lucide:search",
+                        "lucide:send",
+                        "lucide:server",
+                        "lucide:server-cog",
+                        "lucide:settings",
+                        "lucide:share-2",
+                        "lucide:sheet",
+                        "lucide:shield",
+                        "lucide:shield-check",
+                        "lucide:ship",
+                        "lucide:shopping-cart",
+                        "lucide:shuffle",
+                        "lucide:signal",
+                        "lucide:smartphone",
+                        "lucide:sparkles",
+                        "lucide:split",
+                        "lucide:star",
+                        "lucide:store",
+                        "lucide:sun",
+                        "lucide:table",
+                        "lucide:tablet",
+                        "lucide:terminal",
+                        "lucide:thumbs-up",
+                        "lucide:ticket",
+                        "lucide:timer",
+                        "lucide:train",
+                        "lucide:triangle-alert",
+                        "lucide:truck",
+                        "lucide:tv",
+                        "lucide:upload",
+                        "lucide:user",
+                        "lucide:users",
+                        "lucide:video",
+                        "lucide:wallet",
+                        "lucide:warehouse",
+                        "lucide:watch",
+                        "lucide:waypoints",
+                        "lucide:webhook",
+                        "lucide:wifi",
+                        "lucide:workflow",
+                        "lucide:wrench",
+                        "lucide:zap",
+                        "vendor:1password",
+                        "vendor:akamai",
+                        "vendor:algolia",
+                        "vendor:alibabacloud",
+                        "vendor:almalinux",
+                        "vendor:alpinelinux",
+                        "vendor:amd",
+                        "vendor:android",
+                        "vendor:angular",
+                        "vendor:ansible",
+                        "vendor:anthropic",
+                        "vendor:apache",
+                        "vendor:apacheairflow",
+                        "vendor:apachecassandra",
+                        "vendor:apacheflink",
+                        "vendor:apachehadoop",
+                        "vendor:apachekafka",
+                        "vendor:apachemaven",
+                        "vendor:apachepulsar",
+                        "vendor:apachesolr",
+                        "vendor:apachespark",
+                        "vendor:apachetomcat",
+                        "vendor:apollographql",
+                        "vendor:apple",
+                        "vendor:appveyor",
+                        "vendor:appwrite",
+                        "vendor:archlinux",
+                        "vendor:arduino",
+                        "vendor:argo",
+                        "vendor:arm",
+                        "vendor:assemblyscript",
+                        "vendor:atlassian",
+                        "vendor:auth0",
+                        "vendor:backblaze",
+                        "vendor:backstage",
+                        "vendor:bamboo",
+                        "vendor:bazel",
+                        "vendor:bitbucket",
+                        "vendor:bitrise",
+                        "vendor:bitwarden",
+                        "vendor:buildkite",
+                        "vendor:bun",
+                        "vendor:bunnydotnet",
+                        "vendor:c",
+                        "vendor:caddy",
+                        "vendor:caprover",
+                        "vendor:centos",
+                        "vendor:ceph",
+                        "vendor:checkmarx",
+                        "vendor:chef",
+                        "vendor:cilium",
+                        "vendor:circleci",
+                        "vendor:cisco",
+                        "vendor:citrix",
+                        "vendor:clickhouse",
+                        "vendor:clojure",
+                        "vendor:cloudflare",
+                        "vendor:cloudflarepages",
+                        "vendor:cloudflareworkers",
+                        "vendor:cloudinary",
+                        "vendor:cloudron",
+                        "vendor:cmake",
+                        "vendor:cncf",
+                        "vendor:cockroachlabs",
+                        "vendor:codeberg",
+                        "vendor:codecov",
+                        "vendor:codemagic",
+                        "vendor:commonlisp",
+                        "vendor:concourse",
+                        "vendor:confluence",
+                        "vendor:consul",
+                        "vendor:contabo",
+                        "vendor:containerd",
+                        "vendor:coolify",
+                        "vendor:couchbase",
+                        "vendor:cplusplus",
+                        "vendor:crystal",
+                        "vendor:dapr",
+                        "vendor:dart",
+                        "vendor:databricks",
+                        "vendor:datadog",
+                        "vendor:dell",
+                        "vendor:dependabot",
+                        "vendor:digitalocean",
+                        "vendor:discord",
+                        "vendor:django",
+                        "vendor:docker",
+                        "vendor:dotnet",
+                        "vendor:drizzle",
+                        "vendor:drone",
+                        "vendor:duckdb",
+                        "vendor:eclipsemosquitto",
+                        "vendor:elastic",
+                        "vendor:elasticsearch",
+                        "vendor:elixir",
+                        "vendor:elm",
+                        "vendor:envoyproxy",
+                        "vendor:erlang",
+                        "vendor:espressif",
+                        "vendor:etcd",
+                        "vendor:falco",
+                        "vendor:fastapi",
+                        "vendor:fastlane",
+                        "vendor:fastly",
+                        "vendor:fauna",
+                        "vendor:firebase",
+                        "vendor:flask",
+                        "vendor:fluentbit",
+                        "vendor:fluentd",
+                        "vendor:flydotio",
+                        "vendor:fortinet",
+                        "vendor:fortran",
+                        "vendor:freebsd",
+                        "vendor:fsharp",
+                        "vendor:git",
+                        "vendor:gitea",
+                        "vendor:github",
+                        "vendor:githubactions",
+                        "vendor:githubpages",
+                        "vendor:gitlab",
+                        "vendor:gleam",
+                        "vendor:go",
+                        "vendor:godaddy",
+                        "vendor:google",
+                        "vendor:googlebigquery",
+                        "vendor:googlecloud",
+                        "vendor:googlecloudstorage",
+                        "vendor:gradle",
+                        "vendor:grafana",
+                        "vendor:graphql",
+                        "vendor:hashicorp",
+                        "vendor:haskell",
+                        "vendor:hasura",
+                        "vendor:helm",
+                        "vendor:hetzner",
+                        "vendor:hostinger",
+                        "vendor:hp",
+                        "vendor:huawei",
+                        "vendor:huggingface",
+                        "vendor:influxdb",
+                        "vendor:intel",
+                        "vendor:ionos",
+                        "vendor:ios",
+                        "vendor:istio",
+                        "vendor:jaeger",
+                        "vendor:jetbrains",
+                        "vendor:jfrog",
+                        "vendor:jira",
+                        "vendor:json",
+                        "vendor:julia",
+                        "vendor:jupyter",
+                        "vendor:k3s",
+                        "vendor:k6",
+                        "vendor:kibana",
+                        "vendor:knative",
+                        "vendor:kong",
+                        "vendor:kotlin",
+                        "vendor:koyeb",
+                        "vendor:kubernetes",
+                        "vendor:langchain",
+                        "vendor:lenovo",
+                        "vendor:lens",
+                        "vendor:linkerd",
+                        "vendor:linux",
+                        "vendor:logstash",
+                        "vendor:longhorn",
+                        "vendor:lua",
+                        "vendor:macos",
+                        "vendor:make",
+                        "vendor:mariadb",
+                        "vendor:markdown",
+                        "vendor:meilisearch",
+                        "vendor:meta",
+                        "vendor:mikrotik",
+                        "vendor:minio",
+                        "vendor:mongodb",
+                        "vendor:mqtt",
+                        "vendor:mysql",
+                        "vendor:namecheap",
+                        "vendor:natsdotio",
+                        "vendor:neo4j",
+                        "vendor:neon",
+                        "vendor:netlify",
+                        "vendor:newrelic",
+                        "vendor:nextdotjs",
+                        "vendor:nginx",
+                        "vendor:nim",
+                        "vendor:nixos",
+                        "vendor:nodedotjs",
+                        "vendor:nomad",
+                        "vendor:notion",
+                        "vendor:npm",
+                        "vendor:nutanix",
+                        "vendor:nuxt",
+                        "vendor:nvidia",
+                        "vendor:nx",
+                        "vendor:ocaml",
+                        "vendor:octopusdeploy",
+                        "vendor:okta",
+                        "vendor:ollama",
+                        "vendor:openapiinitiative",
+                        "vendor:openid",
+                        "vendor:opensearch",
+                        "vendor:openssl",
+                        "vendor:openstack",
+                        "vendor:opensuse",
+                        "vendor:opentelemetry",
+                        "vendor:opentofu",
+                        "vendor:openvpn",
+                        "vendor:openwrt",
+                        "vendor:ovh",
+                        "vendor:packer",
+                        "vendor:pagerduty",
+                        "vendor:paloaltonetworks",
+                        "vendor:paypal",
+                        "vendor:perl",
+                        "vendor:pfsense",
+                        "vendor:planetscale",
+                        "vendor:pnpm",
+                        "vendor:pocketbase",
+                        "vendor:podman",
+                        "vendor:portainer",
+                        "vendor:postgresql",
+                        "vendor:postman",
+                        "vendor:presto",
+                        "vendor:prisma",
+                        "vendor:prometheus",
+                        "vendor:proxmox",
+                        "vendor:pulumi",
+                        "vendor:puppet",
+                        "vendor:purescript",
+                        "vendor:python",
+                        "vendor:pytorch",
+                        "vendor:qualcomm",
+                        "vendor:rabbitmq",
+                        "vendor:racket",
+                        "vendor:railway",
+                        "vendor:rancher",
+                        "vendor:raspberrypi",
+                        "vendor:react",
+                        "vendor:redhat",
+                        "vendor:redhatopenshift",
+                        "vendor:redis",
+                        "vendor:render",
+                        "vendor:renovate",
+                        "vendor:rook",
+                        "vendor:rubyonrails",
+                        "vendor:samsung",
+                        "vendor:sap",
+                        "vendor:scala",
+                        "vendor:scaleway",
+                        "vendor:scylladb",
+                        "vendor:semaphoreci",
+                        "vendor:sentry",
+                        "vendor:shopify",
+                        "vendor:skaffold",
+                        "vendor:snowflake",
+                        "vendor:snyk",
+                        "vendor:solidity",
+                        "vendor:sonar",
+                        "vendor:sonatype",
+                        "vendor:spinnaker",
+                        "vendor:splunk",
+                        "vendor:spring",
+                        "vendor:springboot",
+                        "vendor:sqlite",
+                        "vendor:stripe",
+                        "vendor:supabase",
+                        "vendor:suse",
+                        "vendor:svelte",
+                        "vendor:swagger",
+                        "vendor:swift",
+                        "vendor:synology",
+                        "vendor:tailscale",
+                        "vendor:teamcity",
+                        "vendor:tekton",
+                        "vendor:tensorflow",
+                        "vendor:terraform",
+                        "vendor:thanos",
+                        "vendor:timescale",
+                        "vendor:toml",
+                        "vendor:tplink",
+                        "vendor:traefikproxy",
+                        "vendor:travisci",
+                        "vendor:trino",
+                        "vendor:trivy",
+                        "vendor:truenas",
+                        "vendor:turborepo",
+                        "vendor:turso",
+                        "vendor:typescript",
+                        "vendor:ubiquiti",
+                        "vendor:ubuntu",
+                        "vendor:unraid",
+                        "vendor:upcloud",
+                        "vendor:upstash",
+                        "vendor:vagrant",
+                        "vendor:vault",
+                        "vendor:vercel",
+                        "vendor:vim",
+                        "vendor:vitess",
+                        "vendor:vmware",
+                        "vendor:vultr",
+                        "vendor:wasabi",
+                        "vendor:webassembly",
+                        "vendor:wireguard",
+                        "vendor:wordpress",
+                        "vendor:xiaomi",
+                        "vendor:yaml",
+                        "vendor:yarn",
+                        "vendor:zerotier",
+                        "vendor:zoom"
+                      ]
+                    },
+                    {
+                      "type": "string",
+                      "pattern": "^custom:.+$"
+                    }
+                  ]
+                }
+              },
+              "additionalProperties": false
+            },
+            "zone": {
+              "default": {},
+              "type": "object",
+              "properties": {
+                "color": {
+                  "default": "#5b7cfa",
+                  "type": "string",
+                  "pattern": "^#[0-9a-fA-F]{6}$",
+                  "description": "Tint and border colour, 6-digit hex."
+                },
+                "dashed": {
+                  "default": false,
+                  "type": "boolean",
+                  "description": "Dashed border."
+                },
+                "border": {
+                  "default": 1.5,
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 8,
+                  "description": "Border width, px."
+                },
+                "fill": {
+                  "default": 1,
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 4,
+                  "description": "Fill strength multiplier (1 = normal tint)."
+                }
+              },
+              "additionalProperties": false
+            },
+            "edge": {
+              "default": {},
+              "type": "object",
+              "properties": {
+                "arrows": {
+                  "default": "end",
+                  "type": "string",
+                  "enum": [
+                    "none",
+                    "end",
+                    "start",
+                    "both"
+                  ],
+                  "description": "Which ends get an arrowhead."
+                },
+                "style": {
+                  "default": "solid",
+                  "type": "string",
+                  "enum": [
+                    "solid",
+                    "dashed",
+                    "dotted"
+                  ]
+                },
+                "color": {
+                  "default": "#6b7488",
+                  "type": "string",
+                  "pattern": "^#[0-9a-fA-F]{6}$",
+                  "description": "Line colour, 6-digit hex."
+                },
+                "width": {
+                  "default": 2,
+                  "type": "number",
+                  "exclusiveMinimum": 0,
+                  "description": "Line width, px."
+                },
+                "arrowSize": {
+                  "default": 1,
+                  "type": "number",
+                  "exclusiveMinimum": 0,
+                  "description": "Arrowhead size multiplier."
+                },
+                "flow": {
+                  "default": {},
+                  "type": "object",
+                  "properties": {
+                    "enabled": {
+                      "default": true,
+                      "type": "boolean",
+                      "description": "Animate dots moving along the wire."
+                    },
+                    "direction": {
+                      "default": "forward",
+                      "type": "string",
+                      "enum": [
+                        "forward",
+                        "backward",
+                        "both"
+                      ],
+                      "description": "\"forward\" = from → to."
+                    },
+                    "speed": {
+                      "default": 1,
+                      "type": "number",
+                      "exclusiveMinimum": 0,
+                      "description": "Animation speed multiplier; higher is faster."
+                    }
+                  },
+                  "description": "Animated flow along the wire.",
+                  "additionalProperties": false
+                }
+              },
+              "additionalProperties": false
+            },
+            "text": {
+              "default": {},
+              "type": "object",
+              "properties": {
+                "color": {
+                  "default": "",
+                  "type": "string",
+                  "pattern": "^(#[0-9a-fA-F]{6})?$",
+                  "description": "Text colour (plain text) or paper colour (note); \"\" = theme default."
+                }
+              },
+              "additionalProperties": false
+            },
+            "note": {
+              "default": {},
+              "type": "object",
+              "properties": {
+                "color": {
+                  "default": "#f7d774",
+                  "type": "string",
+                  "pattern": "^(#[0-9a-fA-F]{6})?$",
+                  "description": "Text colour (plain text) or paper colour (note); \"\" = theme default."
+                },
+                "w": {
+                  "default": 3,
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                "d": {
+                  "default": 2,
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "description": "Diagram-wide style defaults. Items inherit any style field they don’t set themselves.",
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "pages": {
+      "default": [
+        {
+          "id": "main",
+          "name": "Main",
+          "description": "",
+          "nodes": [],
+          "zones": [],
+          "edges": [],
+          "texts": []
+        }
+      ],
+      "description": "The pages, in order. The first one opens first.",
+      "minItems": 1,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Unique among pages. Links refer to it."
+          },
+          "name": {
+            "default": "",
+            "description": "Shown in the page list and next to the diagram name.",
+            "type": "string"
+          },
+          "description": {
+            "default": "",
+            "type": "string"
+          },
+          "nodes": {
+            "default": [],
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "Unique across all nodes, zones, edges and texts on all pages. Any string works; short readable ids like \"api\" are fine."
+                },
+                "name": {
+                  "default": "",
+                  "description": "Shown as the item’s label.",
+                  "type": "string"
+                },
+                "description": {
+                  "default": "",
+                  "description": "Longer text. Shown when a share link is open and, if the label style allows, under the name.",
+                  "type": "string"
+                },
+                "label": {
+                  "description": "Overrides for this item’s label. Missing fields come from settings.labelDefaults.",
+                  "type": "object",
+                  "properties": {
+                    "side": {
+                      "type": "string",
+                      "enum": [
+                        "top",
+                        "bottom",
+                        "left",
+                        "right",
+                        "center"
+                      ],
+                      "description": "Which side of the item the label sits on, in the text’s own frame."
+                    },
+                    "align": {
+                      "type": "string",
+                      "enum": [
+                        "start",
+                        "middle",
+                        "end"
+                      ],
+                      "description": "Position along that side."
+                    },
+                    "orientation": {
+                      "type": "string",
+                      "enum": [
+                        "screen",
+                        "ground-x",
+                        "ground-y",
+                        "wall-x",
+                        "wall-y"
+                      ],
+                      "description": "How the text is drawn: \"screen\" faces the viewer; \"ground-x\"/\"ground-y\" lie flat on the ground along that axis; \"wall-x\"/\"wall-y\" stand upright along that axis."
+                    },
+                    "inside": {
+                      "type": "boolean",
+                      "description": "Place the label just inside the item’s outline instead of outside."
+                    },
+                    "offset": {
+                      "type": "number",
+                      "description": "Distance from the outline, in px."
+                    },
+                    "fontSize": {
+                      "type": "number",
+                      "minimum": 4,
+                      "maximum": 200,
+                      "description": "Font size in px."
+                    },
+                    "showDescription": {
+                      "type": "boolean",
+                      "description": "Also show the item’s description under its name."
+                    },
+                    "hidden": {
+                      "type": "boolean",
+                      "description": "Hide the label."
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "locked": {
+                  "description": "Can be selected but not moved or resized on the canvas. A locked zone locks what is inside it.",
+                  "type": "boolean"
+                },
+                "hidden": {
+                  "description": "Not drawn anywhere, including exports. A hidden zone hides what is inside it, and wires to hidden items are hidden too.",
+                  "type": "boolean"
+                },
+                "x": {
+                  "type": "number",
+                  "description": "Grid x of the corner with the smallest x and y (not the centre)."
+                },
+                "y": {
+                  "type": "number",
+                  "description": "Grid y of that corner."
+                },
+                "w": {
+                  "default": 2,
+                  "description": "Size along x, in grid units.",
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                "d": {
+                  "default": 2,
+                  "description": "Size along y, in grid units.",
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                "h": {
+                  "default": 1,
+                  "description": "Height, in grid units. 0 = flat.",
+                  "type": "number",
+                  "minimum": 0
+                },
+                "icon": {
+                  "description": "\"lucide:<name>\" for a built-in icon, \"vendor:<name>\" for a product logo, or \"custom:<assetId>\" for an entry in assets.",
+                  "anyOf": [
+                    {
+                      "enum": [
+                        "lucide:activity",
+                        "lucide:anchor",
+                        "lucide:antenna",
+                        "lucide:app-window",
+                        "lucide:archive",
+                        "lucide:arrow-left-right",
+                        "lucide:bar-chart-3",
+                        "lucide:bell",
+                        "lucide:binary",
+                        "lucide:blocks",
+                        "lucide:bot",
+                        "lucide:box",
+                        "lucide:boxes",
+                        "lucide:braces",
+                        "lucide:brain",
+                        "lucide:bug",
+                        "lucide:building",
+                        "lucide:building-2",
+                        "lucide:cable",
+                        "lucide:calendar",
+                        "lucide:camera",
+                        "lucide:car",
+                        "lucide:chart-line",
+                        "lucide:chart-pie",
+                        "lucide:circle-alert",
+                        "lucide:clock",
+                        "lucide:cloud",
+                        "lucide:cloud-cog",
+                        "lucide:cloud-rain",
+                        "lucide:code",
+                        "lucide:cog",
+                        "lucide:coins",
+                        "lucide:combine",
+                        "lucide:component",
+                        "lucide:container",
+                        "lucide:cpu",
+                        "lucide:credit-card",
+                        "lucide:cylinder",
+                        "lucide:database",
+                        "lucide:database-backup",
+                        "lucide:database-zap",
+                        "lucide:download",
+                        "lucide:eye",
+                        "lucide:factory",
+                        "lucide:file",
+                        "lucide:file-text",
+                        "lucide:filter",
+                        "lucide:fingerprint",
+                        "lucide:flag",
+                        "lucide:flame",
+                        "lucide:folder",
+                        "lucide:folder-open",
+                        "lucide:gamepad-2",
+                        "lucide:gauge",
+                        "lucide:git-branch",
+                        "lucide:git-merge",
+                        "lucide:globe",
+                        "lucide:hammer",
+                        "lucide:hard-drive",
+                        "lucide:hard-drive-download",
+                        "lucide:hash",
+                        "lucide:headphones",
+                        "lucide:heart",
+                        "lucide:home",
+                        "lucide:image",
+                        "lucide:inbox",
+                        "lucide:info",
+                        "lucide:kanban",
+                        "lucide:key",
+                        "lucide:landmark",
+                        "lucide:laptop",
+                        "lucide:layers",
+                        "lucide:layers-2",
+                        "lucide:layout-dashboard",
+                        "lucide:leaf",
+                        "lucide:lightbulb",
+                        "lucide:link",
+                        "lucide:list-todo",
+                        "lucide:lock",
+                        "lucide:mail",
+                        "lucide:map",
+                        "lucide:map-pin",
+                        "lucide:memory-stick",
+                        "lucide:merge",
+                        "lucide:message-square",
+                        "lucide:microchip",
+                        "lucide:monitor",
+                        "lucide:moon",
+                        "lucide:music",
+                        "lucide:navigation",
+                        "lucide:network",
+                        "lucide:package",
+                        "lucide:panels-top-left",
+                        "lucide:phone",
+                        "lucide:plane",
+                        "lucide:plug",
+                        "lucide:printer",
+                        "lucide:puzzle",
+                        "lucide:radio",
+                        "lucide:receipt",
+                        "lucide:refresh-cw",
+                        "lucide:repeat",
+                        "lucide:rocket",
+                        "lucide:router",
+                        "lucide:rss",
+                        "lucide:satellite",
+                        "lucide:scale",
+                        "lucide:search",
+                        "lucide:send",
+                        "lucide:server",
+                        "lucide:server-cog",
+                        "lucide:settings",
+                        "lucide:share-2",
+                        "lucide:sheet",
+                        "lucide:shield",
+                        "lucide:shield-check",
+                        "lucide:ship",
+                        "lucide:shopping-cart",
+                        "lucide:shuffle",
+                        "lucide:signal",
+                        "lucide:smartphone",
+                        "lucide:sparkles",
+                        "lucide:split",
+                        "lucide:star",
+                        "lucide:store",
+                        "lucide:sun",
+                        "lucide:table",
+                        "lucide:tablet",
+                        "lucide:terminal",
+                        "lucide:thumbs-up",
+                        "lucide:ticket",
+                        "lucide:timer",
+                        "lucide:train",
+                        "lucide:triangle-alert",
+                        "lucide:truck",
+                        "lucide:tv",
+                        "lucide:upload",
+                        "lucide:user",
+                        "lucide:users",
+                        "lucide:video",
+                        "lucide:wallet",
+                        "lucide:warehouse",
+                        "lucide:watch",
+                        "lucide:waypoints",
+                        "lucide:webhook",
+                        "lucide:wifi",
+                        "lucide:workflow",
+                        "lucide:wrench",
+                        "lucide:zap",
+                        "vendor:1password",
+                        "vendor:akamai",
+                        "vendor:algolia",
+                        "vendor:alibabacloud",
+                        "vendor:almalinux",
+                        "vendor:alpinelinux",
+                        "vendor:amd",
+                        "vendor:android",
+                        "vendor:angular",
+                        "vendor:ansible",
+                        "vendor:anthropic",
+                        "vendor:apache",
+                        "vendor:apacheairflow",
+                        "vendor:apachecassandra",
+                        "vendor:apacheflink",
+                        "vendor:apachehadoop",
+                        "vendor:apachekafka",
+                        "vendor:apachemaven",
+                        "vendor:apachepulsar",
+                        "vendor:apachesolr",
+                        "vendor:apachespark",
+                        "vendor:apachetomcat",
+                        "vendor:apollographql",
+                        "vendor:apple",
+                        "vendor:appveyor",
+                        "vendor:appwrite",
+                        "vendor:archlinux",
+                        "vendor:arduino",
+                        "vendor:argo",
+                        "vendor:arm",
+                        "vendor:assemblyscript",
+                        "vendor:atlassian",
+                        "vendor:auth0",
+                        "vendor:backblaze",
+                        "vendor:backstage",
+                        "vendor:bamboo",
+                        "vendor:bazel",
+                        "vendor:bitbucket",
+                        "vendor:bitrise",
+                        "vendor:bitwarden",
+                        "vendor:buildkite",
+                        "vendor:bun",
+                        "vendor:bunnydotnet",
+                        "vendor:c",
+                        "vendor:caddy",
+                        "vendor:caprover",
+                        "vendor:centos",
+                        "vendor:ceph",
+                        "vendor:checkmarx",
+                        "vendor:chef",
+                        "vendor:cilium",
+                        "vendor:circleci",
+                        "vendor:cisco",
+                        "vendor:citrix",
+                        "vendor:clickhouse",
+                        "vendor:clojure",
+                        "vendor:cloudflare",
+                        "vendor:cloudflarepages",
+                        "vendor:cloudflareworkers",
+                        "vendor:cloudinary",
+                        "vendor:cloudron",
+                        "vendor:cmake",
+                        "vendor:cncf",
+                        "vendor:cockroachlabs",
+                        "vendor:codeberg",
+                        "vendor:codecov",
+                        "vendor:codemagic",
+                        "vendor:commonlisp",
+                        "vendor:concourse",
+                        "vendor:confluence",
+                        "vendor:consul",
+                        "vendor:contabo",
+                        "vendor:containerd",
+                        "vendor:coolify",
+                        "vendor:couchbase",
+                        "vendor:cplusplus",
+                        "vendor:crystal",
+                        "vendor:dapr",
+                        "vendor:dart",
+                        "vendor:databricks",
+                        "vendor:datadog",
+                        "vendor:dell",
+                        "vendor:dependabot",
+                        "vendor:digitalocean",
+                        "vendor:discord",
+                        "vendor:django",
+                        "vendor:docker",
+                        "vendor:dotnet",
+                        "vendor:drizzle",
+                        "vendor:drone",
+                        "vendor:duckdb",
+                        "vendor:eclipsemosquitto",
+                        "vendor:elastic",
+                        "vendor:elasticsearch",
+                        "vendor:elixir",
+                        "vendor:elm",
+                        "vendor:envoyproxy",
+                        "vendor:erlang",
+                        "vendor:espressif",
+                        "vendor:etcd",
+                        "vendor:falco",
+                        "vendor:fastapi",
+                        "vendor:fastlane",
+                        "vendor:fastly",
+                        "vendor:fauna",
+                        "vendor:firebase",
+                        "vendor:flask",
+                        "vendor:fluentbit",
+                        "vendor:fluentd",
+                        "vendor:flydotio",
+                        "vendor:fortinet",
+                        "vendor:fortran",
+                        "vendor:freebsd",
+                        "vendor:fsharp",
+                        "vendor:git",
+                        "vendor:gitea",
+                        "vendor:github",
+                        "vendor:githubactions",
+                        "vendor:githubpages",
+                        "vendor:gitlab",
+                        "vendor:gleam",
+                        "vendor:go",
+                        "vendor:godaddy",
+                        "vendor:google",
+                        "vendor:googlebigquery",
+                        "vendor:googlecloud",
+                        "vendor:googlecloudstorage",
+                        "vendor:gradle",
+                        "vendor:grafana",
+                        "vendor:graphql",
+                        "vendor:hashicorp",
+                        "vendor:haskell",
+                        "vendor:hasura",
+                        "vendor:helm",
+                        "vendor:hetzner",
+                        "vendor:hostinger",
+                        "vendor:hp",
+                        "vendor:huawei",
+                        "vendor:huggingface",
+                        "vendor:influxdb",
+                        "vendor:intel",
+                        "vendor:ionos",
+                        "vendor:ios",
+                        "vendor:istio",
+                        "vendor:jaeger",
+                        "vendor:jetbrains",
+                        "vendor:jfrog",
+                        "vendor:jira",
+                        "vendor:json",
+                        "vendor:julia",
+                        "vendor:jupyter",
+                        "vendor:k3s",
+                        "vendor:k6",
+                        "vendor:kibana",
+                        "vendor:knative",
+                        "vendor:kong",
+                        "vendor:kotlin",
+                        "vendor:koyeb",
+                        "vendor:kubernetes",
+                        "vendor:langchain",
+                        "vendor:lenovo",
+                        "vendor:lens",
+                        "vendor:linkerd",
+                        "vendor:linux",
+                        "vendor:logstash",
+                        "vendor:longhorn",
+                        "vendor:lua",
+                        "vendor:macos",
+                        "vendor:make",
+                        "vendor:mariadb",
+                        "vendor:markdown",
+                        "vendor:meilisearch",
+                        "vendor:meta",
+                        "vendor:mikrotik",
+                        "vendor:minio",
+                        "vendor:mongodb",
+                        "vendor:mqtt",
+                        "vendor:mysql",
+                        "vendor:namecheap",
+                        "vendor:natsdotio",
+                        "vendor:neo4j",
+                        "vendor:neon",
+                        "vendor:netlify",
+                        "vendor:newrelic",
+                        "vendor:nextdotjs",
+                        "vendor:nginx",
+                        "vendor:nim",
+                        "vendor:nixos",
+                        "vendor:nodedotjs",
+                        "vendor:nomad",
+                        "vendor:notion",
+                        "vendor:npm",
+                        "vendor:nutanix",
+                        "vendor:nuxt",
+                        "vendor:nvidia",
+                        "vendor:nx",
+                        "vendor:ocaml",
+                        "vendor:octopusdeploy",
+                        "vendor:okta",
+                        "vendor:ollama",
+                        "vendor:openapiinitiative",
+                        "vendor:openid",
+                        "vendor:opensearch",
+                        "vendor:openssl",
+                        "vendor:openstack",
+                        "vendor:opensuse",
+                        "vendor:opentelemetry",
+                        "vendor:opentofu",
+                        "vendor:openvpn",
+                        "vendor:openwrt",
+                        "vendor:ovh",
+                        "vendor:packer",
+                        "vendor:pagerduty",
+                        "vendor:paloaltonetworks",
+                        "vendor:paypal",
+                        "vendor:perl",
+                        "vendor:pfsense",
+                        "vendor:planetscale",
+                        "vendor:pnpm",
+                        "vendor:pocketbase",
+                        "vendor:podman",
+                        "vendor:portainer",
+                        "vendor:postgresql",
+                        "vendor:postman",
+                        "vendor:presto",
+                        "vendor:prisma",
+                        "vendor:prometheus",
+                        "vendor:proxmox",
+                        "vendor:pulumi",
+                        "vendor:puppet",
+                        "vendor:purescript",
+                        "vendor:python",
+                        "vendor:pytorch",
+                        "vendor:qualcomm",
+                        "vendor:rabbitmq",
+                        "vendor:racket",
+                        "vendor:railway",
+                        "vendor:rancher",
+                        "vendor:raspberrypi",
+                        "vendor:react",
+                        "vendor:redhat",
+                        "vendor:redhatopenshift",
+                        "vendor:redis",
+                        "vendor:render",
+                        "vendor:renovate",
+                        "vendor:rook",
+                        "vendor:rubyonrails",
+                        "vendor:samsung",
+                        "vendor:sap",
+                        "vendor:scala",
+                        "vendor:scaleway",
+                        "vendor:scylladb",
+                        "vendor:semaphoreci",
+                        "vendor:sentry",
+                        "vendor:shopify",
+                        "vendor:skaffold",
+                        "vendor:snowflake",
+                        "vendor:snyk",
+                        "vendor:solidity",
+                        "vendor:sonar",
+                        "vendor:sonatype",
+                        "vendor:spinnaker",
+                        "vendor:splunk",
+                        "vendor:spring",
+                        "vendor:springboot",
+                        "vendor:sqlite",
+                        "vendor:stripe",
+                        "vendor:supabase",
+                        "vendor:suse",
+                        "vendor:svelte",
+                        "vendor:swagger",
+                        "vendor:swift",
+                        "vendor:synology",
+                        "vendor:tailscale",
+                        "vendor:teamcity",
+                        "vendor:tekton",
+                        "vendor:tensorflow",
+                        "vendor:terraform",
+                        "vendor:thanos",
+                        "vendor:timescale",
+                        "vendor:toml",
+                        "vendor:tplink",
+                        "vendor:traefikproxy",
+                        "vendor:travisci",
+                        "vendor:trino",
+                        "vendor:trivy",
+                        "vendor:truenas",
+                        "vendor:turborepo",
+                        "vendor:turso",
+                        "vendor:typescript",
+                        "vendor:ubiquiti",
+                        "vendor:ubuntu",
+                        "vendor:unraid",
+                        "vendor:upcloud",
+                        "vendor:upstash",
+                        "vendor:vagrant",
+                        "vendor:vault",
+                        "vendor:vercel",
+                        "vendor:vim",
+                        "vendor:vitess",
+                        "vendor:vmware",
+                        "vendor:vultr",
+                        "vendor:wasabi",
+                        "vendor:webassembly",
+                        "vendor:wireguard",
+                        "vendor:wordpress",
+                        "vendor:xiaomi",
+                        "vendor:yaml",
+                        "vendor:yarn",
+                        "vendor:zerotier",
+                        "vendor:zoom"
+                      ]
+                    },
+                    {
+                      "type": "string",
+                      "pattern": "^custom:.+$"
+                    }
+                  ]
+                },
+                "zoneId": {
+                  "description": "Derived on load from positions (innermost zone containing the centre). You don’t need to set it.",
+                  "type": "string"
+                },
+                "link": {
+                  "type": "object",
+                  "properties": {
+                    "page": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Id of the page to open."
+                    }
+                  },
+                  "required": [
+                    "page"
+                  ],
+                  "description": "Opens another page when the item is clicked in view or present mode.",
+                  "additionalProperties": false
+                },
+                "shape": {
+                  "type": "string",
+                  "enum": [
+                    "block",
+                    "cylinder",
+                    "flat",
+                    "icon"
+                  ],
+                  "description": "\"block\" box, \"cylinder\" (databases), \"flat\" tile on the ground, \"icon\" just the icon."
+                },
+                "color": {
+                  "type": "string",
+                  "pattern": "^#[0-9a-fA-F]{6}$",
+                  "description": "Fill colour, 6-digit hex."
+                },
+                "outline": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 6,
+                  "description": "Outline stroke width, px."
+                },
+                "iconPlacement": {
+                  "type": "string",
+                  "enum": [
+                    "top",
+                    "billboard",
+                    "wall-x",
+                    "wall-y"
+                  ],
+                  "description": "\"top\" flat on the top face, \"billboard\" standing upright facing the viewer, \"wall-x\"/\"wall-y\" on the side face along that axis."
+                },
+                "iconScale": {
+                  "type": "number",
+                  "exclusiveMinimum": 0,
+                  "description": "Icon size multiplier."
+                },
+                "iconColor": {
+                  "type": "string",
+                  "pattern": "^(#[0-9a-fA-F]{6})?$",
+                  "description": "Icon colour; \"\" = automatic contrast colour."
+                }
+              },
+              "required": [
+                "id",
+                "x",
+                "y"
+              ],
+              "description": "A box, cylinder, tile or icon standing on the ground grid.",
+              "additionalProperties": false
+            }
+          },
+          "zones": {
+            "default": [],
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "Unique across all nodes, zones, edges and texts on all pages. Any string works; short readable ids like \"api\" are fine."
+                },
+                "name": {
+                  "default": "",
+                  "description": "Shown as the item’s label.",
+                  "type": "string"
+                },
+                "description": {
+                  "default": "",
+                  "description": "Longer text. Shown when a share link is open and, if the label style allows, under the name.",
+                  "type": "string"
+                },
+                "label": {
+                  "description": "Overrides for this item’s label. Missing fields come from settings.labelDefaults.",
+                  "type": "object",
+                  "properties": {
+                    "side": {
+                      "type": "string",
+                      "enum": [
+                        "top",
+                        "bottom",
+                        "left",
+                        "right",
+                        "center"
+                      ],
+                      "description": "Which side of the item the label sits on, in the text’s own frame."
+                    },
+                    "align": {
+                      "type": "string",
+                      "enum": [
+                        "start",
+                        "middle",
+                        "end"
+                      ],
+                      "description": "Position along that side."
+                    },
+                    "orientation": {
+                      "type": "string",
+                      "enum": [
+                        "screen",
+                        "ground-x",
+                        "ground-y",
+                        "wall-x",
+                        "wall-y"
+                      ],
+                      "description": "How the text is drawn: \"screen\" faces the viewer; \"ground-x\"/\"ground-y\" lie flat on the ground along that axis; \"wall-x\"/\"wall-y\" stand upright along that axis."
+                    },
+                    "inside": {
+                      "type": "boolean",
+                      "description": "Place the label just inside the item’s outline instead of outside."
+                    },
+                    "offset": {
+                      "type": "number",
+                      "description": "Distance from the outline, in px."
+                    },
+                    "fontSize": {
+                      "type": "number",
+                      "minimum": 4,
+                      "maximum": 200,
+                      "description": "Font size in px."
+                    },
+                    "showDescription": {
+                      "type": "boolean",
+                      "description": "Also show the item’s description under its name."
+                    },
+                    "hidden": {
+                      "type": "boolean",
+                      "description": "Hide the label."
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "locked": {
+                  "description": "Can be selected but not moved or resized on the canvas. A locked zone locks what is inside it.",
+                  "type": "boolean"
+                },
+                "hidden": {
+                  "description": "Not drawn anywhere, including exports. A hidden zone hides what is inside it, and wires to hidden items are hidden too.",
+                  "type": "boolean"
+                },
+                "x": {
+                  "type": "number",
+                  "description": "Grid x of the corner with the smallest x and y."
+                },
+                "y": {
+                  "type": "number",
+                  "description": "Grid y of that corner."
+                },
+                "w": {
+                  "type": "number",
+                  "exclusiveMinimum": 0,
+                  "description": "Size along x, in grid units."
+                },
+                "d": {
+                  "type": "number",
+                  "exclusiveMinimum": 0,
+                  "description": "Size along y, in grid units."
+                },
+                "parentZoneId": {
+                  "description": "Derived on load from positions (the smallest larger zone containing this one). You don’t need to set it.",
+                  "type": "string"
+                },
+                "link": {
+                  "type": "object",
+                  "properties": {
+                    "page": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Id of the page to open."
+                    }
+                  },
+                  "required": [
+                    "page"
+                  ],
+                  "description": "Opens another page when the item is clicked in view or present mode.",
+                  "additionalProperties": false
+                },
+                "color": {
+                  "type": "string",
+                  "pattern": "^#[0-9a-fA-F]{6}$",
+                  "description": "Tint and border colour, 6-digit hex."
+                },
+                "dashed": {
+                  "type": "boolean",
+                  "description": "Dashed border."
+                },
+                "border": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 8,
+                  "description": "Border width, px."
+                },
+                "fill": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 4,
+                  "description": "Fill strength multiplier (1 = normal tint)."
+                }
+              },
+              "required": [
+                "id",
+                "x",
+                "y",
+                "w",
+                "d"
+              ],
+              "description": "A rectangle on the ground that groups whatever lies inside it. Zones can nest.",
+              "additionalProperties": false
+            }
+          },
+          "edges": {
+            "default": [],
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "Unique across all nodes, zones, edges and texts on all pages. Any string works; short readable ids like \"api\" are fine."
+                },
+                "name": {
+                  "default": "",
+                  "description": "Shown as the item’s label.",
+                  "type": "string"
+                },
+                "description": {
+                  "default": "",
+                  "description": "Longer text. Shown when a share link is open and, if the label style allows, under the name.",
+                  "type": "string"
+                },
+                "label": {
+                  "description": "Overrides for this item’s label. Missing fields come from settings.labelDefaults.",
+                  "type": "object",
+                  "properties": {
+                    "side": {
+                      "type": "string",
+                      "enum": [
+                        "top",
+                        "bottom",
+                        "left",
+                        "right",
+                        "center"
+                      ],
+                      "description": "Which side of the item the label sits on, in the text’s own frame."
+                    },
+                    "align": {
+                      "type": "string",
+                      "enum": [
+                        "start",
+                        "middle",
+                        "end"
+                      ],
+                      "description": "Position along that side."
+                    },
+                    "orientation": {
+                      "type": "string",
+                      "enum": [
+                        "screen",
+                        "ground-x",
+                        "ground-y",
+                        "wall-x",
+                        "wall-y"
+                      ],
+                      "description": "How the text is drawn: \"screen\" faces the viewer; \"ground-x\"/\"ground-y\" lie flat on the ground along that axis; \"wall-x\"/\"wall-y\" stand upright along that axis."
+                    },
+                    "inside": {
+                      "type": "boolean",
+                      "description": "Place the label just inside the item’s outline instead of outside."
+                    },
+                    "offset": {
+                      "type": "number",
+                      "description": "Distance from the outline, in px."
+                    },
+                    "fontSize": {
+                      "type": "number",
+                      "minimum": 4,
+                      "maximum": 200,
+                      "description": "Font size in px."
+                    },
+                    "showDescription": {
+                      "type": "boolean",
+                      "description": "Also show the item’s description under its name."
+                    },
+                    "hidden": {
+                      "type": "boolean",
+                      "description": "Hide the label."
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "locked": {
+                  "description": "Can be selected but not moved or resized on the canvas. A locked zone locks what is inside it.",
+                  "type": "boolean"
+                },
+                "hidden": {
+                  "description": "Not drawn anywhere, including exports. A hidden zone hides what is inside it, and wires to hidden items are hidden too.",
+                  "type": "boolean"
+                },
+                "from": {
+                  "type": "object",
+                  "properties": {
+                    "nodeId": {
+                      "description": "Id of a node. Give either nodeId or zoneId.",
+                      "type": "string"
+                    },
+                    "zoneId": {
+                      "description": "Id of a zone; the wire attaches to its border. Give either nodeId or zoneId.",
+                      "type": "string"
+                    },
+                    "port": {
+                      "description": "Side to attach to: \"n\" = -y, \"s\" = +y, \"w\" = -x, \"e\" = +x. Omit to pick automatically.",
+                      "type": "string",
+                      "enum": [
+                        "n",
+                        "e",
+                        "s",
+                        "w"
+                      ]
+                    }
+                  },
+                  "oneOf": [
+                    {
+                      "required": [
+                        "nodeId"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "zoneId"
+                      ]
+                    }
+                  ],
+                  "additionalProperties": false
+                },
+                "to": {
+                  "type": "object",
+                  "properties": {
+                    "nodeId": {
+                      "description": "Id of a node. Give either nodeId or zoneId.",
+                      "type": "string"
+                    },
+                    "zoneId": {
+                      "description": "Id of a zone; the wire attaches to its border. Give either nodeId or zoneId.",
+                      "type": "string"
+                    },
+                    "port": {
+                      "description": "Side to attach to: \"n\" = -y, \"s\" = +y, \"w\" = -x, \"e\" = +x. Omit to pick automatically.",
+                      "type": "string",
+                      "enum": [
+                        "n",
+                        "e",
+                        "s",
+                        "w"
+                      ]
+                    }
+                  },
+                  "oneOf": [
+                    {
+                      "required": [
+                        "nodeId"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "zoneId"
+                      ]
+                    }
+                  ],
+                  "additionalProperties": false
+                },
+                "waypoints": {
+                  "default": [],
+                  "description": "Optional bend points in grid units. Omit to route automatically at right angles.",
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "x": {
+                        "type": "number"
+                      },
+                      "y": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "x",
+                      "y"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "labelAt": {
+                  "default": 0.5,
+                  "description": "Label position along the path, 0..1.",
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "arrows": {
+                  "type": "string",
+                  "enum": [
+                    "none",
+                    "end",
+                    "start",
+                    "both"
+                  ],
+                  "description": "Which ends get an arrowhead."
+                },
+                "style": {
+                  "type": "string",
+                  "enum": [
+                    "solid",
+                    "dashed",
+                    "dotted"
+                  ]
+                },
+                "color": {
+                  "type": "string",
+                  "pattern": "^#[0-9a-fA-F]{6}$",
+                  "description": "Line colour, 6-digit hex."
+                },
+                "width": {
+                  "type": "number",
+                  "exclusiveMinimum": 0,
+                  "description": "Line width, px."
+                },
+                "arrowSize": {
+                  "type": "number",
+                  "exclusiveMinimum": 0,
+                  "description": "Arrowhead size multiplier."
+                },
+                "flow": {
+                  "type": "object",
+                  "properties": {
+                    "enabled": {
+                      "type": "boolean",
+                      "description": "Animate dots moving along the wire."
+                    },
+                    "direction": {
+                      "type": "string",
+                      "enum": [
+                        "forward",
+                        "backward",
+                        "both"
+                      ],
+                      "description": "\"forward\" = from → to."
+                    },
+                    "speed": {
+                      "type": "number",
+                      "exclusiveMinimum": 0,
+                      "description": "Animation speed multiplier; higher is faster."
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "id",
+                "from",
+                "to"
+              ],
+              "description": "A wire between two nodes or zones.",
+              "additionalProperties": false
+            }
+          },
+          "texts": {
+            "default": [],
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "Unique across all nodes, zones, edges and texts on all pages. Any string works; short readable ids like \"api\" are fine."
+                },
+                "name": {
+                  "default": "",
+                  "description": "Shown as the item’s label.",
+                  "type": "string"
+                },
+                "description": {
+                  "default": "",
+                  "description": "Longer text. Shown when a share link is open and, if the label style allows, under the name.",
+                  "type": "string"
+                },
+                "label": {
+                  "description": "Overrides for this item’s label. Missing fields come from settings.labelDefaults.",
+                  "type": "object",
+                  "properties": {
+                    "side": {
+                      "type": "string",
+                      "enum": [
+                        "top",
+                        "bottom",
+                        "left",
+                        "right",
+                        "center"
+                      ],
+                      "description": "Which side of the item the label sits on, in the text’s own frame."
+                    },
+                    "align": {
+                      "type": "string",
+                      "enum": [
+                        "start",
+                        "middle",
+                        "end"
+                      ],
+                      "description": "Position along that side."
+                    },
+                    "orientation": {
+                      "type": "string",
+                      "enum": [
+                        "screen",
+                        "ground-x",
+                        "ground-y",
+                        "wall-x",
+                        "wall-y"
+                      ],
+                      "description": "How the text is drawn: \"screen\" faces the viewer; \"ground-x\"/\"ground-y\" lie flat on the ground along that axis; \"wall-x\"/\"wall-y\" stand upright along that axis."
+                    },
+                    "inside": {
+                      "type": "boolean",
+                      "description": "Place the label just inside the item’s outline instead of outside."
+                    },
+                    "offset": {
+                      "type": "number",
+                      "description": "Distance from the outline, in px."
+                    },
+                    "fontSize": {
+                      "type": "number",
+                      "minimum": 4,
+                      "maximum": 200,
+                      "description": "Font size in px."
+                    },
+                    "showDescription": {
+                      "type": "boolean",
+                      "description": "Also show the item’s description under its name."
+                    },
+                    "hidden": {
+                      "type": "boolean",
+                      "description": "Hide the label."
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "locked": {
+                  "description": "Can be selected but not moved or resized on the canvas. A locked zone locks what is inside it.",
+                  "type": "boolean"
+                },
+                "hidden": {
+                  "description": "Not drawn anywhere, including exports. A hidden zone hides what is inside it, and wires to hidden items are hidden too.",
+                  "type": "boolean"
+                },
+                "kind": {
+                  "type": "string",
+                  "enum": [
+                    "text",
+                    "note"
+                  ],
+                  "description": "\"text\" = free text on the ground (name is the text); \"note\" = a sticky note (name is the title, description the body)."
+                },
+                "x": {
+                  "type": "number",
+                  "description": "Text: anchor point. Note: grid x of the corner with the smallest x and y."
+                },
+                "y": {
+                  "type": "number",
+                  "description": "Text: anchor point. Note: grid y of that corner."
+                },
+                "w": {
+                  "default": 3,
+                  "description": "Note size along x (ignored for plain text).",
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                "d": {
+                  "default": 2,
+                  "description": "Note size along y (ignored for plain text).",
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                "color": {
+                  "description": "Overrides the text/note default; \"\" = theme text colour.",
+                  "type": "string",
+                  "pattern": "^(#[0-9a-fA-F]{6})?$"
+                },
+                "zoneId": {
+                  "description": "Derived on load from positions (innermost zone containing the centre). You don’t need to set it.",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "kind",
+                "x",
+                "y"
+              ],
+              "description": "Free text or a sticky note.",
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "description": "One page of the diagram. Wires connect items on the same page.",
+        "additionalProperties": false
+      }
+    },
+    "assets": {
+      "default": {},
+      "description": "Custom SVG icons by id.",
+      "type": "object",
+      "propertyNames": {
+        "type": "string"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "viewBox": {
+            "type": "array",
+            "prefixItems": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "items": false,
+            "minItems": 4,
+            "maxItems": 4
+          },
+          "body": {
+            "type": "string",
+            "description": "Inner SVG markup (no <svg> wrapper). Sanitized on load."
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "viewBox",
+          "body"
+        ],
+        "description": "A custom SVG icon, referenced as \"custom:<id>\".",
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "format"
+  ],
+  "description": "An Archipen diagram (*.archipen.json).",
+  "additionalProperties": false
+}

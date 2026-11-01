@@ -1,0 +1,40 @@
+{
+  "$schema": "../schema/archipen.schema.json",
+  "format": "archipen",
+  "name": "Kubernetes cluster",
+  "pages": [
+    {
+      "id": "main",
+      "name": "Main",
+      "zones": [
+        { "id": "cluster", "name": "Kubernetes cluster", "x": 3, "y": -3, "w": 28, "d": 21, "color": "#5b7cfa" },
+        { "id": "ns-apps", "name": "apps", "x": 10, "y": -2, "w": 10, "d": 11, "color": "#2fb5a0", "dashed": true },
+        { "id": "ns-data", "name": "data", "x": 23, "y": -2, "w": 6, "d": 11, "color": "#f2a93b", "dashed": true },
+        { "id": "ns-monitoring", "name": "monitoring", "x": 10, "y": 12, "w": 10, "d": 5, "color": "#8a94a6", "dashed": true }
+      ],
+      "nodes": [
+        { "id": "users", "name": "Users", "x": 0, "y": 2, "shape": "icon", "iconPlacement": "billboard", "icon": "lucide:users", "color": "#8a94a6" },
+        { "id": "ingress", "name": "Ingress", "x": 6, "y": 2, "h": 0.6, "icon": "vendor:nginx", "color": "#4aa3df" },
+        { "id": "web", "name": "Web", "description": "Deployment, 3 replicas", "x": 11, "y": -1, "icon": "vendor:nextdotjs", "color": "#2fb5a0" },
+        { "id": "api", "name": "API", "description": "Deployment, 4 replicas", "x": 16, "y": -1, "icon": "vendor:go", "color": "#2fb5a0" },
+        { "id": "cron", "name": "Cron job", "x": 11, "y": 5, "h": 0.6, "icon": "lucide:clock", "color": "#9b6cf0" },
+        { "id": "worker", "name": "Worker", "x": 16, "y": 5, "icon": "vendor:python", "color": "#9b6cf0" },
+        { "id": "postgres", "name": "Postgres", "description": "StatefulSet", "x": 25, "y": 5, "h": 1.4, "shape": "cylinder", "icon": "vendor:postgresql", "color": "#f2a93b" },
+        { "id": "redis", "name": "Redis", "x": 25, "y": -1, "h": 0.6, "icon": "vendor:redis", "color": "#e5604f" },
+        { "id": "prometheus", "name": "Prometheus", "x": 11, "y": 13, "h": 0.6, "icon": "vendor:prometheus", "color": "#8a94a6" },
+        { "id": "grafana", "name": "Grafana", "x": 16, "y": 13, "h": 0.6, "icon": "vendor:grafana", "color": "#8a94a6" }
+      ],
+      "edges": [
+        { "id": "e-users-ingress", "name": "HTTPS", "from": { "nodeId": "users" }, "to": { "nodeId": "ingress" } },
+        { "id": "e-ingress-web", "from": { "nodeId": "ingress" }, "to": { "nodeId": "web" } },
+        { "id": "e-ingress-api", "name": "/api", "from": { "nodeId": "ingress" }, "to": { "nodeId": "api" } },
+        { "id": "e-api-postgres", "name": "SQL", "from": { "nodeId": "api" }, "to": { "nodeId": "postgres" }, "labelAt": 0.75 },
+        { "id": "e-api-redis", "name": "cache", "from": { "nodeId": "api" }, "to": { "nodeId": "redis" } },
+        { "id": "e-cron-worker", "name": "jobs", "from": { "nodeId": "cron" }, "to": { "nodeId": "worker" }, "style": "dashed" },
+        { "id": "e-worker-postgres", "from": { "nodeId": "worker" }, "to": { "nodeId": "postgres" } },
+        { "id": "e-prometheus-apps", "name": "scrape", "from": { "nodeId": "prometheus" }, "to": { "zoneId": "ns-apps" }, "style": "dotted", "labelAt": 0.3, "flow": { "enabled": false } },
+        { "id": "e-grafana-prometheus", "from": { "nodeId": "grafana" }, "to": { "nodeId": "prometheus" }, "flow": { "enabled": false } }
+      ]
+    }
+  ]
+}

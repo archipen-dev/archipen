@@ -1,0 +1,54 @@
+# Dependency updates.
+# Patch and minor npm and Docker updates merge automatically once CI passes (see
+# workflows/dependabot-automerge.yml). Major updates and all GitHub Actions updates open a PR for review.
+# Workflows pin actions to commit SHAs (with the version as a comment); Dependabot updates both.
+# Cooldown: Dependabot only proposes a version once it is this many days old.
+version: 2
+
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 3
+      semver-patch-days: 3
+      semver-minor-days: 7
+      semver-major-days: 7
+    groups:
+      npm-minor-patch:
+        update-types: [minor, patch]
+    open-pull-requests-limit: 10
+    labels: [dependencies]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 3
+      semver-patch-days: 3
+      semver-minor-days: 7
+      semver-major-days: 7
+    groups:
+      actions-minor-patch:
+        update-types: [minor, patch]
+    open-pull-requests-limit: 10
+    labels: [dependencies]
+
+  # Base images (node, caddy) for the app image and the render/ export server image. Tags in the Dockerfile are pinned to exact
+  # versions so Dependabot can propose patch and minor bumps, not only majors.
+  - package-ecosystem: docker
+    directories: [/, /render]
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 3
+      semver-patch-days: 3
+      semver-minor-days: 7
+      semver-major-days: 7
+    groups:
+      docker-minor-patch:
+        update-types: [minor, patch]
+    open-pull-requests-limit: 10
+    labels: [dependencies]

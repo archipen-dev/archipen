@@ -1,0 +1,37 @@
+{
+  "$schema": "../schema/archipen.schema.json",
+  "format": "archipen",
+  "name": "CI/CD pipeline",
+  "pages": [
+    {
+      "id": "main",
+      "name": "Main",
+      "zones": [
+        { "id": "staging", "name": "Staging", "x": 22, "y": -1, "w": 6, "d": 5, "color": "#f2a93b", "dashed": true },
+        { "id": "production", "name": "Production", "x": 22, "y": 6, "w": 6, "d": 5, "color": "#e5604f" }
+      ],
+      "nodes": [
+        { "id": "dev", "name": "Developer", "x": 0, "y": 3, "shape": "icon", "iconPlacement": "billboard", "icon": "lucide:laptop", "color": "#8a94a6" },
+        { "id": "repo", "name": "Repository", "x": 4, "y": 3, "icon": "vendor:github", "color": "#8a94a6" },
+        { "id": "ci", "name": "CI", "description": "Build, test, push image", "x": 8, "y": 3, "icon": "vendor:githubactions", "color": "#5b7cfa" },
+        { "id": "scan", "name": "Image scan", "x": 8, "y": 7, "h": 0.6, "icon": "lucide:shield-check", "color": "#9b6cf0" },
+        { "id": "registry", "name": "Registry", "x": 13, "y": 3, "h": 1.2, "shape": "cylinder", "icon": "vendor:docker", "color": "#4aa3df" },
+        { "id": "argo", "name": "Argo CD", "description": "Syncs manifests from Git", "x": 17, "y": 3, "icon": "vendor:argo", "color": "#2fb5a0" },
+        { "id": "terraform", "name": "Terraform", "x": 30, "y": 4, "h": 0.6, "icon": "vendor:terraform", "color": "#9b6cf0" },
+        { "id": "k8s-staging", "name": "Cluster", "x": 24, "y": 0, "icon": "vendor:kubernetes", "color": "#f2a93b" },
+        { "id": "k8s-prod", "name": "Cluster", "x": 24, "y": 7, "icon": "vendor:kubernetes", "color": "#e5604f" }
+      ],
+      "edges": [
+        { "id": "e-dev-repo", "name": "push", "from": { "nodeId": "dev" }, "to": { "nodeId": "repo" } },
+        { "id": "e-repo-ci", "from": { "nodeId": "repo" }, "to": { "nodeId": "ci" } },
+        { "id": "e-ci-scan", "from": { "nodeId": "ci" }, "to": { "nodeId": "scan" } },
+        { "id": "e-ci-registry", "name": "image", "from": { "nodeId": "ci" }, "to": { "nodeId": "registry" } },
+        { "id": "e-registry-argo", "from": { "nodeId": "registry" }, "to": { "nodeId": "argo" } },
+        { "id": "e-argo-staging", "name": "auto sync", "from": { "nodeId": "argo", "port": "n" }, "to": { "nodeId": "k8s-staging" } },
+        { "id": "e-argo-prod", "name": "promote", "from": { "nodeId": "argo", "port": "s" }, "to": { "nodeId": "k8s-prod" }, "style": "dashed" },
+        { "id": "e-tf-staging", "from": { "nodeId": "terraform" }, "to": { "nodeId": "k8s-staging" }, "style": "dotted", "flow": { "enabled": false } },
+        { "id": "e-tf-prod", "from": { "nodeId": "terraform" }, "to": { "nodeId": "k8s-prod" }, "style": "dotted", "flow": { "enabled": false } }
+      ]
+    }
+  ]
+}

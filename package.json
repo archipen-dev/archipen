@@ -1,0 +1,47 @@
+{
+  "name": "archipen",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "workspaces": [
+    "app",
+    "render",
+    "mcp",
+    "docs"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w app",
+    "build": "npm run build -w app",
+    "build:render": "npm run build -w render",
+    "build:mcp": "npm run build -w render && npm run build -w mcp",
+    "preview": "npm run preview -w app",
+    "lint": "oxlint",
+    "typecheck": "npm run typecheck -w app && npm run typecheck -w render && npm run typecheck -w mcp",
+    "test": "npm test -w app && npm test -w render && npm test -w mcp",
+    "e2e": "npm run e2e -w app",
+    "schema": "node app/scripts/schema.mjs",
+    "validate": "node app/scripts/validate.mjs",
+    "export": "npm run build -w render --silent && node render/dist/cli.mjs export",
+    "icons:vendor": "npm run icons:vendor -w app",
+    "docs:dev": "npm run dev -w docs",
+    "docs:build": "npm run build -w docs",
+    "site:build": "node scripts/site.mjs"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/archipen-dev/archipen.git"
+  },
+  "homepage": "https://archipen.dev/",
+  "bugs": {
+    "url": "https://github.com/archipen-dev/archipen/issues"
+  },
+  "devDependencies": {
+    "oxlint": "^1.89.0"
+  },
+  "overrides": {
+    "glob": "^14.0.3",
+    "minimatch": "^11.0.3",
+    "@trickfilm400/rollup-plugin-off-main-thread": "^4.0.0"
+  }
+}

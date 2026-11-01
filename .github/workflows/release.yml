@@ -1,0 +1,127 @@
+# Release: push a version tag (vX.Y.Z, or vX.Y.Z-rc.1 for a pre-release) that matches render/ and mcp/package.json.
+#   1. verify   type-check, unit tests, build both packages; the tag must match both package versions
+#   2. images   build, test and push the Docker images for the tag (docker.yml), only after verify passed
+#   3. npm      publish @archipen/render, then @archipen/mcp, to npm (pre-releases under the `next` dist-tag)
+#   4. release  create the GitHub release with generated notes, once the images and the npm package exist
+# npm publishing uses trusted publishing (OIDC): no token secret. On npmjs.com the package's trusted publisher must be
+# this repository and this workflow file, for each package. The very first version has to be published by hand,
+# because a trusted publisher can only be added to a package that already exists (locally: --provenance=false).
+# A version that is already on npm is skipped, so tagging that hand-published version still runs the release job.
+name: Release
+
+on:
+  push:
+    tags: ['v[0-9]+.[0-9]+.[0-9]+*']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      prerelease: ${{ steps.version.outputs.prerelease }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+      - id: version
+        name: Tag must match render/ and mcp/package.json
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          pkg="$(node -p "require('./render/package.json').version")"
+          mcp="$(node -p "require('./mcp/package.json').version")"
+          dep="$(node -p "require('./mcp/package.json').dependencies['@archipen/render']")"
+          if [ "$tag" != "$pkg" ] || [ "$tag" != "$mcp" ] || [ "$tag" != "$dep" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME must match render ($pkg), mcp ($mcp) and mcp's @archipen/render dependency ($dep)"
+            exit 1
+          fi
+          echo "version=$pkg" >> "$GITHUB_OUTPUT"
+          if [[ "$pkg" == *-* ]]; then echo "prerelease=true" >> "$GITHUB_OUTPUT"; else echo "prerelease=false" >> "$GITHUB_OUTPUT"; fi
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build:mcp
+      - name: The packed packages run on their own
+        run: |
+          npm pack -w render -w mcp --pack-destination "$RUNNER_TEMP"
+          cd "$RUNNER_TEMP"
+          npx --yes ./archipen-render-*.tgz export "$GITHUB_WORKSPACE/examples/minimal.archipen.json" -o smoke.png
+          test -s smoke.png
+          mkdir mcp-smoke && cd mcp-smoke && npm init -y > /dev/null
+          npm install ../archipen-render-*.tgz ../archipen-mcp-*.tgz
+          npx archipen-mcp --help
+
+  images:
+    needs: verify
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+    uses: ./.github/workflows/docker.yml
+
+  npm:
+    needs: [verify, images]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # trusted publishing and the provenance statement
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+          registry-url: https://registry.npmjs.org
+      - name: npm 11.5.1 or newer (needed for trusted publishing)
+        run: npm install -g npm@^11.5.1
+      - run: npm ci
+      # render first: @archipen/mcp depends on this exact version.
+      - name: Publish @archipen/render
+        env:
+          VERSION: ${{ needs.verify.outputs.version }}
+        run: |
+          if npm view "@archipen/render@$VERSION" version >/dev/null 2>&1; then
+            echo "@archipen/render@$VERSION is already on npm, skipping"
+          else
+            npm publish -w render --access public ${{ needs.verify.outputs.prerelease == 'true' && '--tag next' || '' }}
+          fi
+      - name: Publish @archipen/mcp
+        env:
+          VERSION: ${{ needs.verify.outputs.version }}
+        run: |
+          if npm view "@archipen/mcp@$VERSION" version >/dev/null 2>&1; then
+            echo "@archipen/mcp@$VERSION is already on npm, skipping"
+          else
+            npm publish -w mcp --access public ${{ needs.verify.outputs.prerelease == 'true' && '--tag next' || '' }}
+          fi
+
+  release:
+    needs: [verify, images, npm]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Create GitHub release
+        run: |
+          owner="${GITHUB_REPOSITORY_OWNER,,}"
+          v="${{ needs.verify.outputs.version }}"
+          notes="$(printf '%s\n' \
+            '```sh' \
+            "docker pull ghcr.io/$owner/archipen:$v" \
+            "docker pull ghcr.io/$owner/archipen-render:$v" \
+            "npx @archipen/render@$v export diagram.archipen.json -o diagram.png" \
+            "claude mcp add archipen -- npx -y @archipen/mcp@$v" \
+            '```')"
+          gh release create "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --verify-tag --title "$GITHUB_REF_NAME" \
+            --generate-notes --notes "$notes" ${{ needs.verify.outputs.prerelease == 'true' && '--prerelease' || '' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

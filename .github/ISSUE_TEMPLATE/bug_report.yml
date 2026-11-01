@@ -1,0 +1,37 @@
+name: Bug report
+description: Something doesn't work as described.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Security problem? Please don't file it here; report it privately via [a security advisory](https://github.com/archipen-dev/archipen/security/advisories/new).
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, and what did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: If a diagram triggers it, attach the `.archipen.json` file (remove anything private first).
+    validations:
+      required: true
+  - type: dropdown
+    id: where
+    attributes:
+      label: Where
+      options:
+        - Editor (browser)
+        - Command line or Node API (@archipen/render)
+        - Export server or Docker image
+        - Documentation
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version, browser and OS
+      placeholder: e.g. 0.2.0, Firefox 140, Windows 11
